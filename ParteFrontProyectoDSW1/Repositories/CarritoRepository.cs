@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using Dapper;
 
-namespace apiModeloExamen.Repositories
+namespace ParteFrontProyectoDSW1.Repositories
 {
     public class CarritoRepository : ICarritoRepository
     {
@@ -17,19 +17,35 @@ namespace apiModeloExamen.Repositories
         public async Task<int> ObtenerCarritoActivoAsync(int idUsuario)
         {
             using var conn = new SqlConnection(_connectionString);
-            return await conn.ExecuteScalarAsync<int>(
-                "sp_Carrito_ObtenerActivo",
-                new { IdUsuario = idUsuario },
-                commandType: CommandType.StoredProcedure);
+            try
+            {
+                return await conn.ExecuteScalarAsync<int>(
+                    "sp_Carrito_ObtenerActivo",
+                    new { IdUsuario = idUsuario },
+                    commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception ex)
+            {
+                // Aquí puedes loguear el error o lanzar una excepción con más contexto
+                throw new Exception($"Error en sp_Carrito_ObtenerActivo: {ex.Message}", ex);
+            }
         }
 
         public async Task AgregarProductoAsync(int idCarrito, int idProducto, int cantidad)
         {
             using var conn = new SqlConnection(_connectionString);
-            await conn.ExecuteAsync(
-                "sp_Carrito_AgregarProducto",
-                new { IdCarrito = idCarrito, IdProducto = idProducto, Cantidad = cantidad },
-                commandType: CommandType.StoredProcedure);
+            try
+            {
+                await conn.ExecuteAsync(
+                    "sp_Carrito_AgregarProducto",
+                    new { IdCarrito = idCarrito, IdProducto = idProducto, Cantidad = cantidad },
+                    commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception ex)
+            {
+                // Aquí puedes loguear el error o lanzar una excepción con más contexto
+                throw new Exception($"Error en sp_Carrito_AgregarProducto: {ex.Message}", ex);
+            }
         }
 
         public async Task<IEnumerable<CarritoDetalle>> VerCarritoAsync(int idCarrito)

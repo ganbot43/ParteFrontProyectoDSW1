@@ -1,0 +1,232 @@
+﻿@model ParteFrontProyectoDSW1.Controllers.CarritoViewModel
+@using ParteFrontProyectoDSW1.Contracts.Entities
+@using ParteFrontProyectoDSW1.Contracts.Dtos
+@using ParteFrontProyectoDSW1.Helpers
+
+@{
+    ViewData["Title"] = "Mi Carrito";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center fw-bold text-primary">Mi Carrito de Compras</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @if (!Model.Items.Any())
+    {
+        <div class="alert alert-info text-center fw-semibold">Tu carrito está vacío.</div>
+    }
+    else
+    {
+        <div class="table-responsive shadow-sm rounded bg-white p-3">
+            <table class="table table-bordered align-middle carrito-table mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="carritoBody">
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr data-id="@item.IdProducto">
+                            <td class="fw-semibold">@item.Nombre</td>
+                            <td class="fw-bold text-primary">S/ @item.Precio.ToString("0.00")</td>
+                            <td>
+                                <input type="number" class="form-control cantidad-input" min="1" value="@item.Cantidad" />
+                            </td>
+                            <td class="subtotal fw-bold text-success">S/ @item.SubTotal.ToString("0.00")</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm btn-eliminar">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-end align-items-center mt-4 gap-3 flex-wrap">
+            <h4 class="fw-bold">Total: <span id="totalCarrito">S/ @Model.Items.Sum(x => x.SubTotal).ToString("0.00")</span></h4>
+            <form asp-action="Checkout" method="post">
+                <button type="submit" class="btn btn-success btn-lg">Finalizar compra</button>
+            </form>
+        </div>
+    }
+</div>
+
+<!-- =========================
+     ESTILOS PROFESIONALES
+========================= -->
+<style>
+    :root {
+        --primary: #ff6a00;
+        --success: #28a745;
+        --danger: #dc3545;
+        --bg-light: #f5f5f7;
+        --text-dark: #1d1d1f;
+        --muted: #6e6e73;
+        --border-radius: 12px;
+    }
+
+    body {
+        background-color: var(--bg-light);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .carrito-table th, .carrito-table td {
+        vertical-align: middle;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .carrito-table tbody tr {
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+        .carrito-table tbody tr:hover {
+            background-color: rgba(255, 106, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+    .cantidad-input {
+        width: 70px;
+        text-align: center;
+        border-radius: var(--border-radius);
+        border: 1px solid #ccc;
+        transition: all 0.2s;
+    }
+
+        .cantidad-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 6px rgba(255, 106, 0, 0.3);
+        }
+
+    .btn-eliminar {
+        background-color: var(--danger);
+        color: #fff;
+        border-radius: var(--border-radius);
+        padding: 0.25rem 0.6rem;
+        transition: all 0.3s;
+    }
+
+        .btn-eliminar:hover {
+            background-color: #b02a37;
+        }
+
+    .btn-success {
+        background-color: var(--primary);
+        border: none;
+        border-radius: var(--border-radius);
+        padding: 0.55rem 1.5rem;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+        .btn-success:hover {
+            background-color: #e55f00;
+        }
+
+    #totalCarrito {
+        color: var(--success);
+        font-size: 1.3rem;
+    }
+
+    .alert-info, .alert-danger {
+        border-radius: var(--border-radius);
+        text-align: center;
+        font-weight: 500;
+    }
+
+    /* Responsive */
+    @@media (max-width: 576px) {
+        .carrito-table th, .carrito-table td
+
+    {
+        font-size: 0.85rem;
+    }
+
+    .btn-success, .btn-eliminar {
+        font-size: 0.85rem;
+        padding: 0.4rem 1rem;
+    }
+
+    }
+</style>
+
+<!-- =========================
+     SCRIPT DE FUNCIONALIDAD
+========================= -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function actualizarSubtotalFila(fila, cantidad, precio) {
+        const subtotal = cantidad * precio;
+        fila.find('.subtotal').text('S/ ' + subtotal.toFixed(2));
+    }
+
+    function actualizarTotal() {
+        let total = 0;
+        $('#carritoBody tr').each(function () {
+            const subtotalText = $(this).find('.subtotal').text().replace('S/ ', '');
+            total += parseFloat(subtotalText);
+        });
+        $('#totalCarrito').text(total.toFixed(2));
+    }
+
+    $(document).ready(function () {
+        // Cambiar cantidad
+        $('.cantidad-input').on('change', function () {
+            const fila = $(this).closest('tr');
+            const idProducto = fila.data('id');
+            let cantidad = parseInt($(this).val());
+            if (cantidad < 1) cantidad = 1;
+            $(this).val(cantidad);
+
+            const precio = parseFloat(fila.find('td:nth-child(2)').text().replace('S/ ', ''));
+
+            // Llamada AJAX para actualizar en API
+            $.ajax({
+                url: '/Cart/Add',
+                type: 'POST',
+                data: { idProducto: idProducto, cantidad: cantidad },
+                success: function () {
+                    actualizarSubtotalFila(fila, cantidad, precio);
+                    actualizarTotal();
+                },
+                error: function () {
+                    alert('Error al actualizar la cantidad.');
+                }
+            });
+        });
+
+        // Eliminar producto
+        $('.btn-eliminar').on('click', function () {
+            const fila = $(this).closest('tr');
+            const idProducto = fila.data('id');
+
+            $.ajax({
+                url: '/Cart/Remove',
+                type: 'POST',
+                data: { idProducto: idProducto },
+                success: function () {
+                    fila.remove();
+                    actualizarTotal();
+                    if ($('#carritoBody tr').length === 0) {
+                        location.reload(); // recargar para mostrar "carrito vacío"
+                    }
+                },
+                error: function () {
+                    alert('Error al eliminar el producto.');
+                }
+            });
+        });
+    });
+</script>

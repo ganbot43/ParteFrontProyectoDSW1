@@ -1,4 +1,4 @@
-﻿namespace apiModeloExamen.Contracts.Entities
+﻿namespace ParteFrontProyectoDSW1.Contracts.Entities
 {
     public class Orden
     {

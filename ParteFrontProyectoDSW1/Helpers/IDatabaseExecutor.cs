@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 
-namespace apiModeloExamen.Helpers
+namespace ParteFrontProyectoDSW1.Helpers
 {
     public interface IDatabaseExecutor
     {

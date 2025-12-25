@@ -1,4 +1,4 @@
-﻿namespace apiModeloExamen.Contracts.Dtos
+﻿namespace ParteFrontProyectoDSW1.Contracts.Dtos
 {
     public class LoginResponseDto
     {
@@ -9,3 +9,5 @@
     }
 
 }
+
+

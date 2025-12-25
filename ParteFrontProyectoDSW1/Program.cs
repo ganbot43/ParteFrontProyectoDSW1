@@ -19,6 +19,15 @@ builder.Services.AddHttpClient("ApiWeb", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFront",
+        policy => policy
+            .WithOrigins("https://localhost:7295") // o el puerto de tu front
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -32,12 +41,13 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseSession();
+app.UseSession(); 
 
 app.UseAuthorization();
+app.UseCors("AllowFront");
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

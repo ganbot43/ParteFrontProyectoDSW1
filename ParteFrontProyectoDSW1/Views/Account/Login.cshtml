@@ -1,0 +1,135 @@
+﻿@model ParteFrontProyectoDSW1.Contracts.Dtos.LoginDto
+
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="login-header">
+            <img src="~/images/logo-apple.svg" alt="Apple" class="login-logo" />
+            <h2>Iniciar sesión</h2>
+            <p>Accede a tu cuenta para continuar</p>
+        </div>
+
+        <form asp-action="Login" method="post">
+            <div class="form-group mb-3">
+                <label asp-for="Email">Correo electrónico</label>
+                <input asp-for="Email" class="form-control" placeholder="correo@ejemplo.com" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="PasswordHash">Contraseña</label>
+                <input asp-for="PasswordHash" type="password" class="form-control" placeholder="••••••••" />
+                <span asp-validation-for="PasswordHash" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Entrar
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <span>¿No tienes cuenta?</span>
+            <a asp-action="Register" asp-controller="Account">Regístrate aquí</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    :root {
+        --orange: #ff6a00;
+        --text: #1d1d1f;
+        --muted: #6e6e73;
+        --bg: #f5f5f7;
+    }
+
+    body {
+        background: var(--bg);
+    }
+
+    /* CONTENEDOR */
+    .login-wrapper {
+        min-height: 80vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* CARD */
+    .login-card {
+        background: #fff;
+        padding: 3rem 2.5rem;
+        border-radius: 28px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 25px 60px rgba(0,0,0,.15);
+    }
+
+    /* HEADER */
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-logo {
+        height: 42px;
+        margin-bottom: 1rem;
+    }
+
+    .login-header h2 {
+        font-weight: 700;
+        margin-bottom: .3rem;
+    }
+
+    .login-header p {
+        color: var(--muted);
+        font-size: .95rem;
+    }
+
+    /* INPUTS */
+    .form-control {
+        padding: .75rem 1rem;
+        border-radius: 14px;
+        border: 1px solid #d2d2d7;
+    }
+
+        .form-control:focus {
+            border-color: var(--orange);
+            box-shadow: none;
+        }
+
+    /* BOTÓN */
+    .btn-login {
+        width: 100%;
+        background: var(--orange);
+        color: #fff;
+        border: none;
+        padding: .8rem;
+        border-radius: 16px;
+        font-weight: 600;
+        transition: .3s;
+    }
+
+        .btn-login:hover {
+            background: #e55f00;
+        }
+
+    /* FOOTER */
+    .login-footer {
+        text-align: center;
+        margin-top: 1.8rem;
+        font-size: .9rem;
+    }
+
+        .login-footer a {
+            color: var(--orange);
+            font-weight: 600;
+            text-decoration: none;
+        }
+</style>

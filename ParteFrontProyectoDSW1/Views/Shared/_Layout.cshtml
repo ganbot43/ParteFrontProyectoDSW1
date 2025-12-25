@@ -1,49 +1,206 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using ParteFrontProyectoDSW1.Contracts.Dtos
+@using ParteFrontProyectoDSW1.Helpers
+@{
+    var usuario = Context.Session.GetObject<LoginResponseDto>("CurrentUser");
+}
+
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ParteFrontProyectoDSW1</title>
+    <title>@ViewData["Title"] - iShop Perú</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ParteFrontProyectoDSW1.styles.css" asp-append-version="true" />
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #f5f5f7;
+            font-family: 'Inter', sans-serif;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        footer {
+            flex-shrink: 0;
+        }
+
+        .navbar-brand {
+            color: #ff6a00 !important;
+            font-weight: bold;
+        }
+
+        /* Carrito flotante / badge */
+        .btn-emoji {
+            font-size: 1.5rem;
+            padding: 0.25rem 0.5rem;
+            background: transparent;
+            border: none;
+            position: relative;
+        }
+
+            .btn-emoji:hover {
+                color: #ff6a00;
+                cursor: pointer;
+            }
+
+            .btn-emoji .badge {
+                position: absolute;
+                top: -5px;
+                right: -10px;
+                font-size: 0.8rem;
+                display: inline-block;
+            }
+
+        .footer-light a {
+            color: #ff6a00;
+            text-decoration: none;
+        }
+
+            .footer-light a:hover {
+                text-decoration: underline;
+            }
+
+        .footer-bottom {
+            background-color: #ff6a00;
+            color: #fff;
+            text-align: center;
+            padding: 0.5rem 0;
+        }
+    </style>
 </head>
 <body>
+    <!-- NAVBAR -->
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ParteFrontProyectoDSW1</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">iShop Perú</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse justify-content-between" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Productos" asp-action="Index">Productos</a></li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a id="btnCarrito" asp-controller="Cart" asp-action="Index" class="btn-emoji nav-link position-relative">
+                                🛒
+                                <span id="carritoBadge" class="badge bg-danger rounded-pill" style="display:none;">0</span>
+                            </a>
                         </li>
                     </ul>
+
+                    <div class="d-flex align-items-center">
+                        @if (usuario == null)
+                        {
+                            <div class="dropdown">
+                                <button class="btn-emoji" id="loginDropdown" data-bs-toggle="dropdown" aria-expanded="false">👤</button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="loginDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Login">Iniciar sesión</a></li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-link p-0 border-0 d-flex align-items-center gap-2" type="button" id="userMenu"
+                                        data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration:none;">
+                                    <span style="font-size:1.5rem;">👤</span>
+                                    <span class="fw-bold" style="color: #ff6a00;">Hola, @usuario.Nombre!</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width:220px;">
+                                    <li><a class="dropdown-item" asp-controller="Orders" asp-action="Index">Historial de pedidos</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">Cerrar sesión</a></li>
+                                </ul>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - ParteFrontProyectoDSW1 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- CONTENIDO PRINCIPAL -->
+    <main role="main" class="flex-fill container py-4">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer-light mt-auto">
+        <div class="container py-4">
+            <div class="row">
+                <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
+                    <h5 class="text-uppercase">iShop Perú</h5>
+                    <p>
+                        Tu tienda Apple Premium Partner. Todos los derechos reservados.<br />
+                        Dirección: Av. Apple 123, Lima, Perú<br />
+                        Teléfono: (01) 123-4567
+                    </p>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="text-uppercase">Enlaces</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li><a href="/" class="text-decoration-none">Inicio</a></li>
+                        <li><a href="/Productos" class="text-decoration-none">Productos</a></li>
+                        <li><a href="/Cart" class="text-decoration-none">Carrito</a></li>
+                        <li><a href="/Account/Login" class="text-decoration-none">Mi cuenta</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="text-uppercase">Contacto</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="mailto:info@ishop.com.pe" class="text-decoration-none">info@ishop.com.pe</a></li>
+                        <li><a href="https://www.instagram.com/" class="text-decoration-none">Instagram</a></li>
+                        <li><a href="https://www.facebook.com/" class="text-decoration-none">Facebook</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
+        <div class="footer-bottom">© @DateTime.Now.Year - iShop Perú</div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Actualizar badge carrito
+        async function actualizarCarrito() {
+            try {
+                const response = await fetch('/Cart/TotalItems');
+                if (!response.ok) throw new Error('Error al obtener el carrito');
+                const total = await response.text();
+                const badge = document.getElementById('carritoBadge');
+                if (badge) {
+                    badge.textContent = total;
+                    badge.style.display = total > 0 ? 'inline-block' : 'none';
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        document.addEventListener('DOMContentLoaded', actualizarCarrito);
+
+        // Agregar producto por Ajax (opcional si quieres usar botón sin recargar)
+        async function agregarCarrito(idProducto) {
+            try {
+                const response = await fetch('/Cart/AddAjax?idProducto=' + idProducto, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    const badge = document.getElementById('carritoBadge');
+                    badge.textContent = data.total;
+                    badge.style.display = data.total > 0 ? 'inline-block' : 'none';
+                }
+            } catch (err) { console.error(err); }
+        }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

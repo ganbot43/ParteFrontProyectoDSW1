@@ -54,9 +54,17 @@
               "target": "Package",
               "version": "[2.1.66, )"
             },
+            "Flurl": {
+              "target": "Package",
+              "version": "[4.0.0, )"
+            },
             "Microsoft.Data.SqlClient": {
               "target": "Package",
               "version": "[6.1.3, )"
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[8.0.22, )"
             }
           },
           "imports": [

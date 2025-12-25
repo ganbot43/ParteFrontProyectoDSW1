@@ -1,0 +1,296 @@
+﻿@model IEnumerable<ParteFrontProyectoDSW1.Contracts.Entities.Producto>
+@using ParteFrontProyectoDSW1.Contracts.Entities
+@using ParteFrontProyectoDSW1.Contracts.Dtos
+@using ParteFrontProyectoDSW1.Helpers
+
+@{
+    ViewData["Title"] = "Productos";
+
+    var categorias = ViewBag.Categorias as IEnumerable<Categoria>
+                     ?? Enumerable.Empty<Categoria>();
+
+    var categoriasDict = categorias.ToDictionary(c => c.IdCategoria, c => c.Nombre);
+
+    var idCategoriaSeleccionada = Context.Request.Query["idCategoria"].FirstOrDefault() ?? "";
+
+    var usuario = Context.Session.GetObject<LoginResponseDto>("CurrentUser");
+}
+
+<!-- =========================
+     CATEGORÍAS
+========================= -->
+<nav class="ishop-categories-bar mb-5">
+    <div class="d-flex flex-row flex-nowrap justify-content-center gap-4 overflow-auto">
+        @foreach (var cat in categorias)
+        {
+            <a href="@Url.Action("Index", new { idCategoria = cat.IdCategoria })"
+               class="ishop-category-link @(idCategoriaSeleccionada == cat.IdCategoria.ToString() ? "active" : "")">
+                <img src="~/images/categorias/@GetCategoriaIcono(cat.Nombre)" alt="@cat.Nombre" />
+                <span>@cat.Nombre</span>
+            </a>
+        }
+    </div>
+</nav>
+
+<!-- =========================
+     BANNER
+========================= -->
+<div class="ishop-banner mb-5 d-flex align-items-center justify-content-between flex-wrap gap-4">
+    <div>
+        <h3 class="fw-bold">Descubre lo último de Apple</h3>
+        <p class="text-muted mb-3">Tecnología premium diseñada para ti</p>
+
+        <form method="get" class="d-flex">
+            <input type="text"
+                   name="search"
+                   class="form-control me-2"
+                   placeholder="Buscar producto..." />
+            <button class="btn btn-success">Buscar</button>
+        </form>
+    </div>
+
+    <img src="~/images/banner-ishop.webp"
+         alt="Banner iShop"
+         style="height:140px;" />
+</div>
+
+<!-- =========================
+     PRODUCTOS
+========================= -->
+<div class="row row-cols-1 row-cols-md-4 g-4">
+    @foreach (var producto in Model)
+    {
+        var categoriaTexto = categoriasDict.GetValueOrDefault(producto.IdCategoria);
+
+        <div class="col">
+            <div class="card ishop-card h-100 border-0">
+
+                <img src="@producto.ImagenUrl"
+                     loading="lazy"
+                     decoding="async"
+                     class="card-img-top"
+                     alt="@producto.Nombre" />
+
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@producto.Nombre</h5>
+
+                    <span class="card-text small">@categoriaTexto</span>
+
+                    <span class="precio mb-3">
+                        S/ @producto.Precio.ToString("0.00")
+                    </span>
+
+                    <div class="mt-auto d-flex gap-2">
+                        <button class="btn btn-outline-secondary w-50"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal@(producto.IdProducto)">
+                            Ver detalle
+                        </button>
+
+                        <form asp-controller="Cart"
+                              asp-action="Add"
+                              method="post"
+                              class="w-50">
+                            <input type="hidden" name="idProducto" value="@producto.IdProducto" />
+                            <button type="submit" class="btn btn-success w-100">
+                                Agregar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================
+             MODAL
+        ========================= -->
+        <div class="modal fade" id="modal@(producto.IdProducto)" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content ishop-modal">
+
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title">@producto.Nombre</h5>
+                        <button class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body text-center px-4">
+                        <img src="@producto.ImagenUrl"
+                             class="img-fluid mb-3"
+                             alt="@producto.Nombre" />
+
+                        <p class="text-muted mb-1">@categoriaTexto</p>
+
+                        <p class="precio-modal mb-3">
+                            S/ @producto.Precio.ToString("0.00")
+                        </p>
+
+                        <p>@producto.Descripcion</p>
+                    </div>
+
+                    <div class="modal-footer border-0">
+                        <form asp-controller="Cart"
+                              asp-action="Add"
+                              method="post"
+                              class="w-100">
+                            <input type="hidden" name="idProducto" value="@producto.IdProducto" />
+                            <button type="submit" class="btn btn-success w-100">
+                                Agregar al carrito
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- =========================
+     ESTILOS PROFESIONALES
+========================= -->
+<style>
+    :root {
+        --orange: #ff6a00;
+        --orange-soft: rgba(255,106,0,.15);
+        --bg: #f5f5f7;
+        --text: #1d1d1f;
+        --muted: #6e6e73;
+        --radius-xl: 26px;
+        --radius-md: 14px;
+    }
+
+    body {
+        background: var(--bg);
+        font-family: 'Inter', sans-serif;
+        color: var(--text);
+    }
+
+    /* CATEGORÍAS */
+    .ishop-categories-bar {
+        background: #fff;
+        padding: 2rem 1.5rem;
+        border-radius: var(--radius-xl);
+        box-shadow: 0 10px 30px rgba(0,0,0,.06);
+    }
+
+    .ishop-category-link {
+        text-decoration: none;
+        color: var(--text);
+        min-width: 120px;
+        font-weight: 600;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform .25s ease;
+    }
+
+        .ishop-category-link img {
+            height: 90px;
+            margin-bottom: 10px;
+            transition: transform .25s ease;
+        }
+
+        .ishop-category-link:hover {
+            transform: translateY(-3px);
+        }
+
+            .ishop-category-link:hover img {
+                transform: scale(1.05);
+            }
+
+        .ishop-category-link.active span {
+            color: var(--orange);
+        }
+
+    /* BANNER */
+    .ishop-banner {
+        background: linear-gradient(120deg, #fff 60%, var(--orange) 40%);
+        padding: 2.5rem;
+        border-radius: var(--radius-xl);
+        box-shadow: 0 15px 40px rgba(0,0,0,.1);
+    }
+
+    /* CARD */
+    .ishop-card {
+        border-radius: var(--radius-xl);
+        background: #fff;
+        transition: transform .3s ease, box-shadow .3s ease;
+    }
+
+        .ishop-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 45px rgba(0,0,0,.12);
+        }
+
+        .ishop-card img {
+            background: var(--bg);
+            padding: 1.5rem;
+            height: 220px;
+            object-fit: contain;
+            border-top-left-radius: var(--radius-xl);
+            border-top-right-radius: var(--radius-xl);
+        }
+
+    .precio {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--orange);
+    }
+
+    /* BOTONES */
+    .btn {
+        border-radius: var(--radius-md);
+        font-weight: 600;
+    }
+
+    .btn-success {
+        background: var(--orange);
+        border: none;
+    }
+
+        .btn-success:hover {
+            background: #e55f00;
+        }
+
+    .btn-outline-secondary:hover {
+        background: var(--orange-soft);
+        color: var(--orange);
+        border-color: var(--orange);
+    }
+
+    /* MODAL */
+    .ishop-modal {
+        border-radius: var(--radius-xl);
+    }
+
+        .ishop-modal img {
+            background: linear-gradient(180deg, var(--bg), #fff);
+            padding: 2rem;
+            border-radius: 20px;
+        }
+
+    .precio-modal {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--orange);
+    }
+</style>
+
+@functions {
+    string GetCategoriaIcono(string nombre)
+    {
+        if (string.IsNullOrEmpty(nombre)) return "default-icon.webp";
+
+        var n = nombre.ToLower();
+
+        if (n.Contains("iphone")) return "iphone-icon.webp";
+        if (n.Contains("ipad")) return "ipad-icon.webp";
+        if (n.Contains("mac")) return "mac-icon.webp";
+        if (n.Contains("watch")) return "watch-icon.webp";
+        if (n.Contains("airpods")) return "airpods-icon.webp";
+        if (n.Contains("accesorios")) return "accesorios-icon.webp";
+        if (n.Contains("tv")) return "appletv-icon.webp";
+
+        return "default-icon.webp";
+    }
+}
