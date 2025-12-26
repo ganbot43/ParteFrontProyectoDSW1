@@ -18,7 +18,7 @@
                 <a href="@Url.Action("Index", new { idCategoria = cat.IdCategoria })"
                    class="category-item @(isSelected ? "active" : "")">
                     <div class="category-icon-wrapper">
-                        <img src="~/images/categorias/@GetCategoriaIcono(cat.Nombre)" alt="@cat.Nombre" />
+                        <img src="@Url.Content("~/images/categorias/" + GetCategoriaIcono(cat.Nombre))" alt="@cat.Nombre" />
                     </div>
                     <span class="category-label">@cat.Nombre</span>
                 </a>
@@ -396,7 +396,7 @@
         if (n.Contains("airpods")) return "airpods-icon.webp";
         if (n.Contains("accesorios")) return "accesorios-icon.webp";
         if (n.Contains("tv")) return "appletv-icon.webp";
-        if (n.Contains("lentes")) return "lentes-virtuales-icon.jpg";
+        if (n.Contains("lentes") || n.Contains("vision pro")) return "lentes-virtuales-icon.jpg";
         return "default-icon.webp";
     }
 }
