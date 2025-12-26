@@ -88,22 +88,34 @@ namespace ParteFrontProyectoDSW1.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(UsuarioLoginDto model)
         {
-            if (!ModelState.IsValid) return View(model);
+            // 1. Asignar valores por defecto que no vienen del formulario
+            model.Rol = "CLIENTE"; // O el rol que manejes por defecto
+            model.Activo = true;   // Normalmente un usuario nuevo debe estar activo
+
+            // 2. Quitar el error de validación del Rol si es que existe (porque lo acabamos de llenar)
+            ModelState.Clear();
+            TryValidateModel(model);
+
+            if (!ModelState.IsValid)
+            {
+                // Si entra aquí, pon un breakpoint para ver qué campo sigue fallando
+                return View(model);
+            }
 
             var client = _httpFactory.CreateClient("ApiWeb");
             try
             {
-                // ⚡ Ruta correcta de tu API para insertar
                 var resp = await client.PostAsJsonAsync("api/Usuarios", model);
                 var txt = await resp.Content.ReadAsStringAsync();
 
                 if (!resp.IsSuccessStatusCode)
                 {
-                    ModelState.AddModelError(string.Empty, $"Error: {txt}");
+                    // LEER EL ERROR QUE VIENE DE LA API
+                    var errorDetail = await resp.Content.ReadAsStringAsync();
+                    ModelState.AddModelError(string.Empty, $"Error del servidor: {errorDetail}");
                     return View(model);
                 }
 
-                // Redirige al login después de registrar
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
