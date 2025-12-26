@@ -6,9 +6,15 @@ wwwroot\images\categorias\airpods-icon.webp
 wwwroot\images\categorias\appletv-icon.webp
 wwwroot\images\categorias\ipad-icon.webp
 wwwroot\images\categorias\iphone-icon.webp
+wwwroot\images\categorias\lentes-virtuales-icon.jpg
 wwwroot\images\categorias\mac-icon.webp
 wwwroot\images\categorias\watch-icon.webp
+wwwroot\images\home\applewatch.png
+wwwroot\images\home\iphone17.jpg
+wwwroot\images\home\macbookpro.jpg
 wwwroot\images\logo-apple.svg
+wwwroot\images\monedas\plin-icon.jpg
+wwwroot\images\monedas\yape-icon.jpg
 wwwroot\images\Productos.pdf
 wwwroot\images\Productos.xlsx
 wwwroot\images\productos\airpods-max.jpg

@@ -1,0 +1,104 @@
+﻿@{
+    ViewData["Title"] = "Soporte Oficial";
+}
+
+<div class="support-header text-center py-5">
+    <h1 class="display-4 fw-bold">Soporte de Apple Store</h1>
+    <p class="text-muted fs-5">Estamos aquí para ayudarte con tus productos y pedidos.</p>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4 justify-content-center">
+        <!-- Card: Estado de Pedido -->
+        <div class="col-md-4">
+            <div class="support-card text-center p-5">
+                <i class="bi bi-box-seam display-4 text-primary-orange mb-3"></i>
+                <h3 class="fw-bold h5">Tus Pedidos</h3>
+                <p class="small text-muted">Consulta el estado de tu envío o gestiona una devolución.</p>
+                <a asp-controller="Orders" asp-action="Index" class="btn btn-link text-decoration-none fw-bold">Rastrear orden ></a>
+            </div>
+        </div>
+
+        <!-- Card: Garantía -->
+        <div class="col-md-4">
+            <div class="support-card text-center p-5">
+                <i class="bi bi-shield-check display-4 text-primary-orange mb-3"></i>
+                <h3 class="fw-bold h5">Garantía y Reparaciones</h3>
+                <p class="small text-muted">Todos nuestros productos cuentan con 1 año de garantía oficial Apple.</p>
+                <a href="#" class="btn btn-link text-decoration-none fw-bold">Ver políticas ></a>
+            </div>
+        </div>
+
+        <!-- Card: Contacto Directo -->
+        <div class="col-md-4">
+            <div class="support-card text-center p-5">
+                <i class="bi bi-chat-dots display-4 text-primary-orange mb-3"></i>
+                <h3 class="fw-bold h5">Contacto Directo</h3>
+                <p class="small text-muted">Habla con un experto de Apple Store por chat o teléfono.</p>
+                <a href="https://wa.me/51923821520" target="_blank" class="btn btn-link text-decoration-none fw-bold text-success">
+                    <i class="bi bi-whatsapp"></i> WhatsApp Soporte >
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Preguntas Frecuentes -->
+    <div class="faq-section mt-5 pt-5">
+        <h2 class="fw-bold text-center mb-5">Preguntas Frecuentes</h2>
+        <div class="accordion accordion-flush mx-auto shadow-sm rounded-4 overflow-hidden" id="faqAccordion" style="max-width: 800px;">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                        ¿Cuáles son los tiempos de envío?
+                    </button>
+                </h2>
+                <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-muted">
+                        Realizamos entregas en Lima en 24 horas y a provincias de 2 a 5 días hábiles.
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                        ¿Puedo pagar en cuotas?
+                    </button>
+                </h2>
+                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-muted">
+                        Sí, aceptamos todas las tarjetas de crédito. Puedes pagar hasta en 12 cuotas sin intereses con bancos seleccionados.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-primary-orange {
+        color: #ff6a00;
+    }
+
+    .support-card {
+        background: #fff;
+        border-radius: 24px;
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+        .support-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
+
+    .accordion-button:not(.collapsed) {
+        background-color: #fffaf7;
+        color: #ff6a00;
+    }
+
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: rgba(255,106,0,0.1);
+    }
+</style>

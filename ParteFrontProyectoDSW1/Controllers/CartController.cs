@@ -50,7 +50,7 @@ namespace ParteFrontProyectoDSW1.Controllers
             return View(model);
         }
 
-        // POST: add/update product in cart (AJAX y normal)
+        // POST: add/update/remove product in cart (AJAX y normal)
         [HttpPost]
         public async Task<IActionResult> Add(int idProducto, int cantidad = 1)
         {
@@ -76,7 +76,6 @@ namespace ParteFrontProyectoDSW1.Controllers
             return RedirectToAction("Index");
         }
 
-        // POST: add product via AJAX (para layout)
         [HttpPost]
         public async Task<IActionResult> AddAjax(int idProducto, int cantidad = 1)
         {
@@ -89,9 +88,9 @@ namespace ParteFrontProyectoDSW1.Controllers
                 return Json(new { success = false, total = 0 });
 
             var client = _httpFactory.CreateClient("ApiWeb");
-            var resp = await client.PostAsync($"api/carrito/agregar-producto?idCarrito={idCarrito}&idProducto={idProducto}&cantidad={cantidad}", null);
+            var resp = await client.PostAsync(
+                $"api/carrito/agregar-producto?idCarrito={idCarrito}&idProducto={idProducto}&cantidad={cantidad}", null);
 
-            // Obtener el nuevo total
             int total = 0;
             if (resp.IsSuccessStatusCode)
             {
@@ -100,27 +99,6 @@ namespace ParteFrontProyectoDSW1.Controllers
             }
 
             return Json(new { success = resp.IsSuccessStatusCode, total });
-        }
-
-        // POST: remove product from cart (AJAX)
-        [HttpPost]
-        public async Task<IActionResult> Remove(int idProducto)
-        {
-            var user = HttpContext.Session.GetObject<UsuarioLoginDto>(SessionUserKey);
-            if (user == null || user.IdUsuario <= 0)
-                return Unauthorized();
-
-            var idCarrito = HttpContext.Session.GetInt32("IdCarrito") ?? 0;
-            if (idCarrito == 0)
-                return BadRequest("No se pudo obtener el carrito activo.");
-
-            var client = _httpFactory.CreateClient("ApiWeb");
-            var resp = await client.PostAsync($"api/carrito/eliminar-producto?idCarrito={idCarrito}&idProducto={idProducto}", null);
-            var txt = await resp.Content.ReadAsStringAsync();
-            if (!resp.IsSuccessStatusCode)
-                return BadRequest(txt);
-
-            return Ok();
         }
 
         // GET: get cart count (para badge del layout)
@@ -162,17 +140,48 @@ namespace ParteFrontProyectoDSW1.Controllers
 
             if (!resp.IsSuccessStatusCode)
             {
-                TempData["ErrorCheckout"] = "No se pudo generar la orden";
+                TempData["ErrorCheckout"] = $"Error generando la orden: {resp.StatusCode}";
                 return RedirectToAction("Index");
             }
 
-            var idOrdenStr = await resp.Content.ReadAsStringAsync();
-            if (!int.TryParse(idOrdenStr, out int idOrden))
+            // Buscar la última orden pendiente del usuario
+            var ordenes = await client.GetFromJsonAsync<List<Orden>>(
+                $"api/orden/por-usuario/{user.IdUsuario}"
+            );
+            var ultimaPendiente = ordenes?
+                .Where(o => o.Estado == "Pendiente" || o.Estado == "PENDIENTE")
+                .OrderByDescending(o => o.FechaOrden)
+                .FirstOrDefault();
+
+            if (ultimaPendiente == null)
+            {
+                TempData["ErrorCheckout"] = "No se pudo encontrar la orden generada";
                 return RedirectToAction("Index");
+            }
 
-            HttpContext.Session.SetInt32("ID_ORDEN", idOrden);
+            return RedirectToAction("Registrar", "Pago", new { idOrden = ultimaPendiente.IdOrden });
+        }
 
-            return RedirectToAction("Registrar", "Pago");
+        [HttpPost]
+        public async Task<IActionResult> Remove(int idProducto)
+        {
+            var user = HttpContext.Session.GetObject<UsuarioLoginDto>(SessionUserKey);
+            if (user == null || user.IdUsuario <= 0)
+                return Unauthorized();
+
+            var idCarrito = HttpContext.Session.GetInt32("IdCarrito") ?? 0;
+            if (idCarrito == 0)
+                return BadRequest("No se pudo obtener el carrito activo.");
+
+            var client = _httpFactory.CreateClient("ApiWeb");
+            var resp = await client.PostAsync(
+                $"api/carrito/eliminar-producto?idCarrito={idCarrito}&idProducto={idProducto}", null);
+
+            var txt = await resp.Content.ReadAsStringAsync();
+            if (!resp.IsSuccessStatusCode)
+                return BadRequest(txt);
+
+            return Ok();
         }
 
         public class CarritoViewModel
@@ -181,5 +190,4 @@ namespace ParteFrontProyectoDSW1.Controllers
             public IEnumerable<CarritoDetalle> Items { get; set; } = Enumerable.Empty<CarritoDetalle>();
         }
     }
-
 }

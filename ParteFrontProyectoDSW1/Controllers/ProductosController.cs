@@ -16,27 +16,52 @@ namespace ParteFrontProyectoDSW1.Controllers
             _httpFactory = httpFactory;
         }
 
-        // Index: lista todos o por categoria
-        public async Task<IActionResult> Index(int? idCategoria = null)
+        // =========================
+        // INDEX: lista todos, por categoría o búsqueda
+        // =========================
+        public async Task<IActionResult> Index(int? idCategoria = null, string search = "")
         {
             var client = _httpFactory.CreateClient("ApiWeb");
 
-            IEnumerable<Producto>? productos;
-            if (idCategoria.HasValue)
+            IEnumerable<Producto>? productos = Enumerable.Empty<Producto>();
+
+            try
             {
-                productos = await client.GetFromJsonAsync<IEnumerable<Producto>>($"api/productos/por-categoria/{idCategoria.Value}");
+                if (!string.IsNullOrEmpty(search))
+                {
+                    // Llamar al endpoint de búsqueda
+                    productos = await client.GetFromJsonAsync<IEnumerable<Producto>>(
+                        $"api/productos/buscar?nombre={Uri.EscapeDataString(search)}"
+                    );
+                }
+                else if (idCategoria.HasValue)
+                {
+                    // Filtrar por categoría
+                    productos = await client.GetFromJsonAsync<IEnumerable<Producto>>(
+                        $"api/productos/por-categoria/{idCategoria.Value}"
+                    );
+                }
+                else
+                {
+                    // Traer todos los productos
+                    productos = await client.GetFromJsonAsync<IEnumerable<Producto>>("api/productos");
+                }
+
+                // Traer categorías
+                var categorias = await client.GetFromJsonAsync<IEnumerable<Categoria>>("api/categorias") ?? Enumerable.Empty<Categoria>();
+                ViewBag.Categorias = categorias;
             }
-            else
+            catch
             {
-                productos = await client.GetFromJsonAsync<IEnumerable<Producto>>("api/productos");
+                TempData["Error"] = "No se pudieron cargar los productos.";
             }
-            var categorias = await client.GetFromJsonAsync<IEnumerable<Categoria>>("api/categorias") ?? Enumerable.Empty<Categoria>();
-            ViewBag.Categorias = categorias;
 
             return View(productos ?? Enumerable.Empty<Producto>());
         }
 
-        // Details
+        // =========================
+        // DETAILS: detalle de un producto
+        // =========================
         public async Task<IActionResult> Details(int id)
         {
             var client = _httpFactory.CreateClient("ApiWeb");
@@ -45,7 +70,9 @@ namespace ParteFrontProyectoDSW1.Controllers
             return View(producto);
         }
 
-        // GET: show upload form
+        // =========================
+        // GET: subir imagen
+        // =========================
         [HttpGet]
         public IActionResult UploadImage(int id)
         {
@@ -53,7 +80,9 @@ namespace ParteFrontProyectoDSW1.Controllers
             return View();
         }
 
-        // POST: send file to backend api/productos/{id}/upload-image
+        // =========================
+        // POST: enviar imagen a API
+        // =========================
         [HttpPost]
         public async Task<IActionResult> UploadImage(int id, IFormFile file)
         {
@@ -97,10 +126,10 @@ namespace ParteFrontProyectoDSW1.Controllers
                 return View();
             }
 
-            // Supón que fileName es el nombre final del archivo guardado
+            // Suponiendo que el API devuelve el nombre final del archivo
             var fileName = file.FileName; // O genera un nombre único si es necesario
             var relativePath = $"/images/productos/{fileName}";
-            // Guarda 'relativePath' en el campo ImagenUrl del producto en la BD
+            // Guarda 'relativePath' en el campo ImagenUrl del producto en la BD si es necesario
 
             return RedirectToAction("Details", new { id });
         }

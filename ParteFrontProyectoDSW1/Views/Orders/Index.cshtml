@@ -1,22 +1,36 @@
 ﻿@{
-    ViewData["Title"] = "Historial de Compras";
+    ViewData["Title"] = "Mis Pedidos";
 }
 
-<h2 class="mb-4 fw-bold">Historial de Compras</h2>
+<div class="container mt-5 pb-5">
+    <div class="row mb-5">
+        <div class="col-12">
+            <h1 class="fw-bold display-5">Tus <span>pedidos.</span></h1>
+            <p class="text-muted">Revisa el estado y los detalles de todas tus compras.</p>
+        </div>
+    </div>
 
-<div id="ordenesContainer" class="row row-cols-1 row-cols-md-3 g-4">
-    <div class="text-center text-muted">Cargando historial...</div>
+    <!-- Contenedor de Órdenes -->
+    <div id="ordenesContainer" class="row g-4">
+        <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3 text-muted">Buscando tus compras...</p>
+        </div>
+    </div>
 </div>
 
-<!-- MODAL DETALLE DE PAGO -->
+<!-- MODAL DETALLE DE PAGO (Diseño Factura) -->
 <div class="modal fade" id="detallePagoModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content ishop-modal p-4">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Detalle del Pago</h5>
-                <button class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content receipt-modal border-0">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="detallePagoBody"></div>
+            <div class="modal-body px-md-5 pb-5" id="detallePagoBody">
+                <!-- Se llena por JS -->
+            </div>
         </div>
     </div>
 </div>
@@ -25,7 +39,6 @@
     <script>
         let pagos = [];
 
-        // Cargar historial de pagos
         (async () => {
             const container = document.getElementById('ordenesContainer');
 
@@ -34,41 +47,46 @@
                 const result = await res.json();
 
                 if (!result.success || !result.data || result.data.length === 0) {
-                    container.innerHTML = `<div class="alert alert-warning text-center">No hay pagos registrados</div>`;
+                    container.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <i class="bi bi-box-seam display-1 text-muted opacity-25"></i>
+                            <h3 class="mt-4 fw-bold">Aún no tienes pedidos</h3>
+                            <p class="text-muted">Cuando realices una compra, aparecerá aquí.</p>
+                            <a href="/Productos" class="btn btn-primary btn-apple mt-3">Empezar a comprar</a>
+                        </div>`;
                     return;
                 }
 
                 pagos = result.data;
+                const ordenesUnicas = [...new Set(pagos.map(p => p.idOrden))];
 
-                // Agrupar por orden
-                const ordenes = [...new Set(pagos.map(p => p.idOrden))];
-
-                container.innerHTML = ordenes.map(idOrden => {
-                    const orden = pagos.find(p => p.idOrden === idOrden);
+                container.innerHTML = ordenesUnicas.map(idOrden => {
+                    const info = pagos.find(p => p.idOrden === idOrden);
+                    const fecha = new Date(info.fechaPago).toLocaleDateString('es-PE', { day:'2-digit', month:'long', year:'numeric' });
+                    const isSuccess = info.estado === "Exitoso";
 
                     return `
-                        <div class="col animate-card">
-                            <div class="card ishop-card h-100 border-0">
-                                <div class="card-body d-flex flex-column justify-content-between">
-                                    <div>
-                                        <h5 class="fw-bold">Orden #${orden.idOrden}</h5>
-                                        <p class="text-muted mb-1">
-                                            ${new Date(orden.fechaPago).toLocaleString()}
-                                        </p>
-                                        <p class="fw-bold text-primary fs-5">
-                                            S/ ${orden.monto.toFixed(2)}
-                                        </p>
-                                        <span class="badge ${orden.estado === "Exitoso" ? "bg-success" : "bg-warning text-dark"}">
-                                            ${orden.estado}
-                                        </span>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="order-card h-100">
+                                <div class="order-card-header">
+                                    <div class="status-icon ${isSuccess ? 'success' : 'pending'}">
+                                        <i class="bi ${isSuccess ? 'bi-check-lg' : 'bi-clock'}"></i>
                                     </div>
-
-                                    <button class="btn btn-outline-primary w-100 mt-3"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#detallePagoModal"
-                                            onclick="verDetalle(${idOrden})">
-                                        Ver detalle
-                                    </button>
+                                    <div class="ms-3">
+                                        <p class="mb-0 text-muted small">Orden #${info.idOrden}</p>
+                                        <p class="mb-0 fw-bold">${fecha}</p>
+                                    </div>
+                                </div>
+                                <div class="order-card-body">
+                                    <div class="d-flex justify-content-between align-items-end">
+                                        <div>
+                                            <p class="mb-1 text-muted small">Total pagado</p>
+                                            <h4 class="fw-bold mb-0">S/ ${info.monto.toFixed(2)}</h4>
+                                        </div>
+                                        <button class="btn btn-view-detail" onclick="verDetalle(${idOrden})" data-bs-toggle="modal" data-bs-target="#detallePagoModal">
+                                            Detalles <i class="bi bi-chevron-right ms-1"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -76,56 +94,80 @@
                 }).join('');
 
             } catch {
-                container.innerHTML = `<div class="alert alert-danger text-center">Error al cargar el historial</div>`;
+                container.innerHTML = `<div class="alert alert-danger rounded-4">Error al conectar con el servidor.</div>`;
             }
         })();
 
-        // Mostrar detalle plano (JSON)
         function verDetalle(idOrden) {
-            const detalles = pagos.filter(p => p.idOrden === idOrden);
+            const items = pagos.filter(p => p.idOrden === idOrden);
+            const base = items[0];
+            const fecha = new Date(base.fechaPago).toLocaleString();
 
-            if (detalles.length === 0) {
-                document.getElementById('detallePagoBody').innerHTML =
-                    `<div class="alert alert-warning text-center">No hay detalle disponible</div>`;
-                return;
-            }
-
-            const filas = detalles.map(p => `
-                <tr>
-                    <td>${p.producto}</td>
-                    <td class="text-center">${p.cantidad}</td>
-                    <td class="text-end">S/ ${p.precioUnitario.toFixed(2)}</td>
-                    <td class="text-end">S/ ${p.subTotal.toFixed(2)}</td>
-                </tr>
+            const filasHtml = items.map(p => `
+                <div class="receipt-item">
+                    <div class="receipt-item-info">
+                        <p class="mb-0 fw-bold text-dark">${p.producto}</p>
+                        <p class="mb-0 text-muted small">${p.cantidad} unidad(es) x S/ ${p.precioUnitario.toFixed(2)}</p>
+                    </div>
+                    <div class="receipt-item-price fw-semibold">
+                        S/ ${p.subTotal.toFixed(2)}
+                    </div>
+                </div>
             `).join('');
 
-            const base = detalles[0];
-
             document.getElementById('detallePagoBody').innerHTML = `
-                <div class="mb-3">
-                    <p><strong>Orden:</strong> #${base.idOrden}</p>
-                    <p><strong>Usuario:</strong> ${base.usuario}</p>
-                    <p><strong>Estado:</strong> ${base.estado}</p>
-                    <p><strong>Método:</strong> ${base.metodo}</p>
+                <div class="text-center mb-5">
+                    <i class="bi bi-apple fs-1 mb-3"></i>
+                    <h2 class="fw-bold mb-1">Recibo de Compra</h2>
+                    <p class="text-muted">Apple Store Ecommerce</p>
                 </div>
 
-                <table class="table table-sm align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Producto</th>
-                            <th class="text-center">Cant</th>
-                            <th class="text-end">Precio</th>
-                            <th class="text-end">Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filas}
-                    </tbody>
-                </table>
+                <div class="receipt-meta mb-4">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <p class="mb-0 text-muted small text-uppercase fw-bold">ID de Orden</p>
+                            <p class="fw-semibold">#${base.idOrden}</p>
+                        </div>
+                        <div class="col-6 text-end">
+                            <p class="mb-0 text-muted small text-uppercase fw-bold">Fecha</p>
+                            <p class="fw-semibold">${fecha}</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-0 text-muted small text-uppercase fw-bold">Cliente</p>
+                            <p class="fw-semibold">${base.usuario}</p>
+                        </div>
+                        <div class="col-6 text-end">
+                            <p class="mb-0 text-muted small text-uppercase fw-bold">Método</p>
+                            <p class="fw-semibold">${base.metodo}</p>
+                        </div>
+                    </div>
+                </div>
 
-                <h5 class="text-end mt-3 fw-bold">
-                    Total: <span class="text-primary">S/ ${base.monto.toFixed(2)}</span>
-                </h5>
+                <div class="receipt-items-container mb-4">
+                    <p class="text-muted small text-uppercase fw-bold mb-3">Artículos</p>
+                    ${filasHtml}
+                </div>
+
+                <div class="receipt-total pt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="fw-semibold">S/ ${base.monto.toFixed(2)}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="text-muted">Envío</span>
+                        <span class="text-success fw-semibold">Gratis</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="fw-bold mb-0">Total del pedido</h4>
+                        <h3 class="fw-bold text-orange mb-0">S/ ${base.monto.toFixed(2)}</h3>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <button class="btn btn-outline-dark btn-sm rounded-pill px-4" onclick="window.print()">
+                        <i class="bi bi-printer me-2"></i> Imprimir Recibo
+                    </button>
+                </div>
             `;
         }
     </script>
@@ -133,54 +175,114 @@
 
 <style>
     :root {
-        --orange: #ff6a00;
-        --bg: #f5f5f7;
-        --text: #1d1d1f;
+        --apple-orange: #ff6a00;
+        --apple-bg: #f5f5f7;
+        --apple-text: #1d1d1f;
+        --apple-muted: #86868b;
+        --radius: 22px;
     }
 
-    body {
-        background: var(--bg);
-        font-family: 'Inter', sans-serif;
+    h1 span {
+        color: var(--apple-orange);
     }
 
-    /* CARDS */
-    .ishop-card {
-        border-radius: 26px;
-        padding: 1rem;
-        transition: all .35s ease;
-        animation: fadeUp .5s ease both;
-    }
-
-        .ishop-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 50px rgba(0,0,0,.15);
-        }
-
-    .text-primary {
-        color: var(--orange) !important;
-    }
-
-    /* MODAL */
-    .ishop-modal {
-        border-radius: 26px;
+    /* ORDER CARDS */
+    .order-card {
         background: #fff;
-        animation: scaleIn .35s ease;
+        border-radius: var(--radius);
+        padding: 24px;
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* BOTONES */
-    .btn-outline-primary {
-        border-radius: 14px;
-        border: 1px solid var(--orange);
-        color: var(--orange);
-    }
-
-        .btn-outline-primary:hover {
-            background: var(--orange);
-            color: #fff;
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
         }
 
-    /* ANIMACIONES (IMPORTANTE: @@ EN RAZOR) */
-    @@keyframes fadeUp {
+    .order-card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #f5f5f7;
+    }
+
+    .status-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+        .status-icon.success {
+            background: #e6f4ea;
+            color: #1e8e3e;
+        }
+
+        .status-icon.pending {
+            background: #fef7e0;
+            color: #f9ab00;
+        }
+
+    .btn-view-detail {
+        background: none;
+        border: none;
+        color: var(--apple-orange);
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0;
+    }
+
+        .btn-view-detail:hover {
+            text-decoration: underline;
+        }
+
+    /* RECEIPT MODAL */
+    .receipt-modal {
+        border-radius: 30px !important;
+    }
+
+    .receipt-meta {
+        background: #f8f8f9;
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .receipt-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f2;
+    }
+
+        .receipt-item:last-child {
+            border-bottom: none;
+        }
+
+    .text-orange {
+        color: var(--apple-orange);
+    }
+
+    .btn-apple {
+        background: var(--apple-orange);
+        border: none;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    /* Animación de entrada de las tarjetas */
+    .order-card {
+        animation: slideUp 0.5s ease backwards;
+    }
+
+    @@keyframes slideUp {
         from {
             opacity: 0;
             transform: translateY(20px);
@@ -189,18 +291,6 @@
         to {
             opacity: 1;
             transform: translateY(0);
-        }
-    }
-
-    @@keyframes scaleIn {
-        from {
-            transform: scale(.95);
-            opacity: 0;
-        }
-
-        to {
-            transform: scale(1);
-            opacity: 1;
         }
     }
 </style>

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Json;
 using ParteFrontProyectoDSW1.Contracts.Dtos;
+using ParteFrontProyectoDSW1.Contracts.Entities;
+using ParteFrontProyectoDSW1.Helpers;
 
 namespace ParteFrontProyectoDSW1.Controllers
 {
@@ -15,37 +17,50 @@ namespace ParteFrontProyectoDSW1.Controllers
 
         // 🟢 PANTALLA DE PAGO
         [HttpGet]
-        public async Task<IActionResult> Registrar()
+        public async Task<IActionResult> Registrar(int idOrden)
         {
-            var idOrden = HttpContext.Session.GetInt32("ID_ORDEN");
+            // Si no se recibe idOrden, buscar la última orden pendiente del usuario
+            if (idOrden <= 0)
+            {
+                var user = HttpContext.Session.GetObject<UsuarioLoginDto>("CurrentUser");
+                if (user == null || user.IdUsuario <= 0)
+                    return RedirectToAction("Login", "Account");
 
-            if (idOrden == null || idOrden <= 0)
-                return RedirectToAction("Index", "Orders");
+                var client = _httpFactory.CreateClient("ApiWeb");
+                var ordenes = await client.GetFromJsonAsync<List<Orden>>(
+                    $"api/orden/por-usuario/{user.IdUsuario}"
+                );
 
-            var client = _httpFactory.CreateClient("ApiWeb");
+                var ultimaPendiente = ordenes?
+                    .Where(o => o.Estado == "Pendiente" || o.Estado == "PENDIENTE")
+                    .OrderByDescending(o => o.FechaOrden)
+                    .FirstOrDefault();
 
-            var orden = await client.GetFromJsonAsync<List<PagoDetalladoDto>>(
+                if (ultimaPendiente == null)
+                    return RedirectToAction("Index", "Orders");
+
+                idOrden = ultimaPendiente.IdOrden;
+            }
+
+            var client2 = _httpFactory.CreateClient("ApiWeb");
+            var productos = await client2.GetFromJsonAsync<List<PagoDetalladoDto>>(
                 $"api/orden/detalle/{idOrden}"
             );
 
-            if (orden == null || !orden.Any())
+            if (productos == null || !productos.Any())
                 return RedirectToAction("Index", "Orders");
 
             ViewBag.IdOrden = idOrden;
-            return View(orden);
+            return View(productos);
         }
 
-        // 🟢 REGISTRA EL PAGO
         [HttpPost]
-        public async Task<IActionResult> Registrar(decimal monto, string metodo)
+        public async Task<IActionResult> Registrar(int idOrden, decimal monto, string metodo)
         {
-            var idOrden = HttpContext.Session.GetInt32("ID_ORDEN");
-
-            if (idOrden == null || idOrden <= 0)
-                return RedirectToAction("Index", "Orders");
+            if (idOrden <= 0)
+                return RedirectToAction("Index", "Productos");
 
             var client = _httpFactory.CreateClient("ApiWeb");
-
             var resp = await client.PostAsync(
                 $"api/pago/registrar?idOrden={idOrden}&monto={monto}&metodo={metodo}",
                 null
@@ -54,14 +69,12 @@ namespace ParteFrontProyectoDSW1.Controllers
             if (!resp.IsSuccessStatusCode)
             {
                 TempData["Error"] = "Error al registrar el pago";
-                return RedirectToAction(nameof(Registrar));
+                return RedirectToAction(nameof(Registrar), new { idOrden });
             }
 
-            // Limpio sesión
-            HttpContext.Session.Remove("ID_ORDEN");
-
-            return RedirectToAction("Index", "Orders");
+            // Mensaje de éxito
+            TempData["Success"] = "Tu pago se ha registrado correctamente.";
+            return RedirectToAction("Index", "Productos"); // redirige al Index de Productos
         }
     }
-
 }

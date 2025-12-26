@@ -1,0 +1,284 @@
+﻿@model IEnumerable<ParteFrontProyectoDSW1.Contracts.Entities.Pago>
+@{
+    ViewData["Title"] = "Administración de Ventas";
+}
+
+<div class="container-fluid px-4 py-4 animate-fade">
+    <!-- Encabezado del Panel -->
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold h2 mb-1">Registro de <span>Transacciones</span></h1>
+            <p class="text-muted">Monitoreo global de ingresos y estados de pago.</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-dark rounded-pill px-4" onclick="window.print()">
+                <i class="bi bi-printer me-2"></i>Imprimir Reporte
+            </button>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Resumen Rápido -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <span class="stat-label">Ingresos Totales</span>
+                <h2 class="stat-value">S/ @Model.Where(x => x.Estado == "Exitoso").Sum(x => x.Monto).ToString("N2")</h2>
+                <span class="stat-indicator success"><i class="bi bi-graph-up"></i> +12% este mes</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <span class="stat-label">Ventas Exitosas</span>
+                <h2 class="stat-value">@Model.Count(x => x.Estado == "Exitoso")</h2>
+                <span class="stat-indicator">Transacciones procesadas</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <span class="stat-label">Ticket Promedio</span>
+                @{
+                    var promedio = Model.Any() ? Model.Average(x => x.Monto) : 0;
+                }
+                <h2 class="stat-value">S/ @promedio.ToString("N2")</h2>
+                <span class="stat-indicator">Basado en historial</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Pagos Estilo Apple -->
+    <div class="admin-table-container">
+        <div class="table-responsive">
+            <table class="table align-middle apple-table">
+                <thead>
+                    <tr>
+                        <th>ID Pago</th>
+                        <th>ID Usuario</th>
+                        <th>Fecha de Cargo</th>
+                        <th>Estado</th>
+                        <th class="text-end">Monto Total</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var pago in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">#@pago.IdPago</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar-sm me-2">U</div>
+                                    <span>Usuario @pago.IdUsuario</span>
+                                </div>
+                            </td>
+                            <td class="text-muted">@pago.FechaPago.ToString("dd MMM, yyyy HH:mm")</td>
+                            <td>
+                                <span class="badge-status @(pago.Estado == "Exitoso" ? "status-success" : "status-pending")">
+                                    @pago.Estado
+                                </span>
+                            </td>
+                            <td class="text-end fw-bold">S/ @pago.Monto.ToString("N2")</td>
+                            <td class="text-center">
+                                <button class="btn btn-action-view btn-detalle" data-id="@pago.IdPago">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalle Premium -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 30px;">
+            <div class="modal-header border-0 px-5 pt-5 pb-0">
+                <h5 class="modal-title fw-bold fs-4">Detalle de Transacción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-5 pb-5" id="detalleModalBody">
+                <!-- Se carga vía AJAX -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Obteniendo datos de la API...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --apple-orange: #ff6a00;
+        --apple-bg: #f5f5f7;
+        --radius: 24px;
+    }
+
+    h1 span {
+        color: var(--apple-orange);
+    }
+
+    /* STAT CARDS */
+    .stat-card {
+        background: #fff;
+        border-radius: var(--radius);
+        padding: 30px;
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .stat-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #86868b;
+        letter-spacing: 1px;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 10px 0;
+    }
+
+    .stat-indicator {
+        font-size: 0.8rem;
+        color: #86868b;
+    }
+
+        .stat-indicator.success {
+            color: #1e8e3e;
+            fw-bold;
+        }
+
+    /* TABLE STYLES */
+    .admin-table-container {
+        background: #fff;
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+    }
+
+    .apple-table thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #86868b;
+        letter-spacing: 0.8px;
+        padding: 20px 15px;
+        border-bottom: 1px solid #f5f5f7;
+    }
+
+    .apple-table tbody td {
+        padding: 18px 15px;
+        border-bottom: 1px solid #f5f5f7;
+    }
+
+    /* BADGES */
+    .badge-status {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-success {
+        background: #e6f4ea;
+        color: #1e8e3e;
+    }
+
+    .status-pending {
+        background: #fef7e0;
+        color: #f9ab00;
+    }
+
+    /* AVATAR */
+    .user-avatar-sm {
+        width: 32px;
+        height: 32px;
+        background: #eee;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.75rem;
+    }
+
+    /* ACTIONS */
+    .btn-action-view {
+        background: #f5f5f7;
+        border: none;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        color: var(--apple-orange);
+        transition: all 0.2s;
+    }
+
+        .btn-action-view:hover {
+            background: var(--apple-orange);
+            color: #fff;
+        }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade {
+        animation: fadeIn 0.5s ease-out;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalElement = document.getElementById('detalleModal');
+            const modalBody = document.getElementById('detalleModalBody');
+
+            document.querySelectorAll('.btn-detalle').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const idPago = this.getAttribute('data-id');
+                    modalBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+
+                    fetch(`/Admin/DetallePago?idPago=${idPago}`)
+                        .then(resp => {
+                            if (!resp.ok) throw new Error();
+                            return resp.json();
+                        })
+                        .then(detalle => {
+                            // Construye el HTML del detalle aquí
+                            modalBody.innerHTML = `
+                                <div>
+                                    <p><strong>Usuario:</strong> ${detalle.usuario ?? ''}</p>
+                                    <p><strong>Producto:</strong> ${detalle.producto ?? ''}</p>
+                                    <p><strong>Cantidad:</strong> ${detalle.cantidad ?? ''}</p>
+                                    <p><strong>Monto:</strong> S/ ${detalle.monto ?? ''}</p>
+                                    <p><strong>Fecha:</strong> ${detalle.fechaPago ?? ''}</p>
+                                    <p><strong>Estado:</strong> ${detalle.estado ?? ''}</p>
+                                </div>
+                            `;
+                        })
+                        .catch(err => {
+                            modalBody.innerHTML = '<div class="alert alert-danger">No se pudo cargar el detalle.</div>';
+                        });
+                });
+            });
+        });
+    </script>
+}

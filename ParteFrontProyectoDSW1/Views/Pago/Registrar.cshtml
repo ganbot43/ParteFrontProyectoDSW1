@@ -1,67 +1,260 @@
-﻿@model ParteFrontProyectoDSW1.Contracts.Dtos.PagoDetalladoDto
-
+﻿@model List<ParteFrontProyectoDSW1.Contracts.Dtos.PagoDetalladoDto>
 @{
     ViewData["Title"] = "Confirmar Pago";
+    var idOrden = ViewBag.IdOrden;
+    var total = Model.Sum(x => x.SubTotal);
 }
 
-<div class="container mt-5">
-    <h2 class="mb-4">Confirmación de Pago</h2>
+<div class="container mt-5 pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header de Pasarela -->
+            <div class="text-center mb-5">
+                <h1 class="fw-bold">Finaliza tu <span>pedido.</span></h1>
+                <p class="text-muted">Orden de compra #@idOrden — Revisión final antes del pago</p>
+            </div>
 
-    <div class="mb-3">
-        <strong>Usuario:</strong> @Model.Usuario <br />
-        <strong>Orden:</strong> #@Model.IdOrden
-    </div>
+            <div class="row g-4">
+                <!-- COLUMNA IZQUIERDA: RESUMEN DE PRODUCTOS -->
+                <div class="col-md-7">
+                    <div class="payment-card p-4">
+                        <h5 class="fw-bold mb-4">Resumen del pedido</h5>
+                        <div class="table-responsive">
+                            <table class="table table-borderless align-middle checkout-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th class="text-center">Cant.</th>
+                                        <th class="text-end">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="d-block fw-semibold text-dark">@item.Producto</span>
+                                                <small class="text-muted">Precio: S/ @item.PrecioUnitario.ToString("N2")</small>
+                                            </td>
+                                            <td class="text-center">@item.Cantidad</td>
+                                            <td class="text-end fw-bold">S/ @item.SubTotal.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-between mt-4 p-3 rounded-4 bg-light">
+                            <span class="fw-bold">Total a pagar:</span>
+                            <span class="fw-bold text-orange h4 mb-0">S/ @total.ToString("N2")</span>
+                        </div>
+                    </div>
+                </div>
 
-    <table class="table table-bordered align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>Producto</th>
-                <th>Precio Unit.</th>
-                <th>Cantidad</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>@Model.Producto</td>
-                <td>S/ @Model.PrecioUnitario.ToString("0.00")</td>
-                <td>@Model.Cantidad</td>
-                <td>S/ @Model.SubTotal.ToString("0.00")</td>
-            </tr>
-        </tbody>
-    </table>
+                <!-- COLUMNA DERECHA: MÉTODO DE PAGO -->
+                <div class="col-md-5">
+                    <div class="payment-card p-4">
+                        <h5 class="fw-bold mb-4">Método de pago</h5>
 
-    <div class="text-end mb-4">
-        <h4>
-            Total a pagar:
-            <strong>S/ @Model.Monto.ToString("0.00")</strong>
-        </h4>
-    </div>
+                        <form asp-action="Registrar" method="post" id="formPago">
+                            <input type="hidden" name="idOrden" value="@idOrden" />
+                            <input type="hidden" name="monto" value="@total" />
+                            <input type="hidden" name="metodo" id="inputMetodo" required />
 
-    <form asp-action="RegistrarPago" method="post">
-        <input type="hidden" name="idOrden" value="@Model.IdOrden" />
-        <input type="hidden" name="monto" value="@Model.Monto" />
+                            <!-- Selección Visual de Métodos con tus imágenes -->
+                            <div class="payment-methods-grid">
+                                <div class="method-item" data-value="Tarjeta">
+                                    <div class="icon-box"><i class="bi bi-credit-card"></i></div>
+                                    <span>Tarjeta</span>
+                                </div>
+                                <div class="method-item" data-value="Yape">
+                                    <div class="icon-box">
+                                        <img src="~/images/monedas/yape-icon.jpg" class="img-payment" alt="Yape" />
+                                    </div>
+                                    <span>Yape</span>
+                                </div>
+                                <div class="method-item" data-value="Plin">
+                                    <div class="icon-box">
+                                        <img src="~/images/monedas/plin-icon.jpg" class="img-payment" alt="Plin" />
+                                    </div>
+                                    <span>Plin</span>
+                                </div>
+                                <div class="method-item" data-value="Efectivo">
+                                    <div class="icon-box"><i class="bi bi-cash-stack"></i></div>
+                                    <span>Efectivo</span>
+                                </div>
+                            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Método de pago</label>
-            <select name="metodo" class="form-select" required>
-                <option value="">Seleccione un método</option>
-                <option value="Tarjeta">Tarjeta</option>
-                <option value="Yape">Yape</option>
-                <option value="Plin">Plin</option>
-                <option value="Efectivo">Efectivo</option>
-            </select>
+                            <div class="security-info my-4 p-3 rounded-4">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="bi bi-shield-lock-fill text-success"></i>
+                                    <span class="small fw-bold">Pago 100% Seguro</span>
+                                </div>
+                                <p class="small text-muted mb-0">Protegemos tus datos con encriptación SSL.</p>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-apple-lg w-100 py-3" id="btnPagar" disabled>
+                                Confirmar y Pagar
+                            </button>
+                        </form>
+
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert alert-danger mt-3 small rounded-3">
+                                <i class="bi bi-exclamation-triangle me-2"></i> @TempData["Error"]
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <button type="submit" class="btn btn-success btn-lg w-100">
-            Realizar Pago
-        </button>
-    </form>
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger mt-3">
-            @TempData["Error"]
-        </div>
-    }
+    </div>
 </div>
+
+<style>
+    :root {
+        --apple-orange: #ff6a00;
+        --apple-bg: #f5f5f7;
+        --border-radius: 28px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    h1 span {
+        color: var(--apple-orange);
+    }
+
+    .payment-card {
+        background: #ffffff;
+        border-radius: var(--border-radius);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    /* Tabla */
+    .checkout-table thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #86868b;
+        letter-spacing: 0.8px;
+        padding-bottom: 15px;
+    }
+
+    .checkout-table tbody td {
+        padding: 18px 0;
+        border-bottom: 1px solid #f5f5f7;
+    }
+
+    .text-orange {
+        color: var(--apple-orange);
+    }
+
+    /* Grid de Métodos */
+    .payment-methods-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .method-item {
+        border: 2px solid #f2f2f7;
+        border-radius: 20px;
+        padding: 20px 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .icon-box {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+        .icon-box i {
+            font-size: 1.8rem;
+            color: #1d1d1f;
+        }
+
+    /* Estilo para tus imágenes JPG */
+    .img-payment {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 10px; /* Redondeado suave para las fotos de Yape/Plin */
+    }
+
+    .method-item span {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #1d1d1f;
+    }
+
+    .method-item:hover {
+        border-color: #d2d2d7;
+        background-color: #fbfbfb;
+    }
+
+    .method-item.selected {
+        border-color: var(--apple-orange);
+        background-color: rgba(255, 106, 0, 0.04);
+    }
+
+        .method-item.selected span {
+            color: var(--apple-orange);
+        }
+
+    /* Info seguridad */
+    .security-info {
+        background: #fbfbfb;
+        border: 1px solid #f2f2f7;
+    }
+
+    .btn-apple-lg {
+        background-color: var(--apple-orange);
+        border: none;
+        border-radius: 16px;
+        font-weight: 700;
+        transition: var(--transition);
+    }
+
+        .btn-apple-lg:hover:not(:disabled) {
+            background-color: #e55f00;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255,106,0,0.2);
+        }
+
+        .btn-apple-lg:disabled {
+            background-color: #d2d2d7;
+            opacity: 0.6;
+        }
+</style>
+
+<script>
+    document.querySelectorAll('.method-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.method-item').forEach(i => i.classList.remove('selected'));
+            this.classList.add('selected');
+
+            const valor = this.dataset.value;
+            document.getElementById('inputMetodo').value = valor;
+            document.getElementById('btnPagar').disabled = false;
+        });
+    });
+
+    document.getElementById('formPago').addEventListener('submit', function(e) {
+        Swal.fire({
+            title: 'Procesando pago...',
+            html: 'Estamos comunicándonos con la entidad financiera.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    });
+</script>

@@ -1,8 +1,214 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio - Apple Store Ecommerce";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero-section iphone-17-hero">
+    <div class="container text-center hero-content">
+        <span class="badge-new mb-3">Nuevo</span>
+        <h1 class="display-1 fw-bold main-title">iPhone 17 Pro</h1>
+        <h2 class="h3 fw-light mb-4 sub-title">Titanio. Inteligencia. Futuro.</h2>
+        <div class="cta-group">
+            <a href="/Productos" class="btn btn-link-apple">Más información <i class="bi bi-chevron-right"></i></a>
+            <a href="/Productos" class="btn btn-apple-dark">Comprar ahora</a>
+        </div>
+    </div>
+
+    <div class="hero-image-box w-100 text-center">
+        <img src="/images/home/iphone17.jpg" alt="iPhone 17 Pro" class="hero-img" />
+    </div>
+</section>
+
+<section class="container-fluid py-5 bg-white">
+    <div class="row g-4 px-4">
+        <div class="col-md-6">
+            <div class="promo-box promo-macbook text-center p-5 rounded-apple">
+                <div class="promo-text-content">
+                    <h3 class="fw-bold text-white display-5">MacBook Pro</h3>
+                    <p class="text-white-50 fs-5">Mente brillante. Cuerpo de acero.</p>
+                    <a href="/Productos" class="text-decoration-none fw-bold text-white link-hover">Ver modelos <i class="bi bi-chevron-right"></i></a>
+                </div>
+                <div class="promo-img-container mt-4">
+                    <img src="/images/home/macbookpro.jpg" class="img-fluid" alt="MacBook Pro">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="promo-box promo-watch text-center p-5 rounded-apple">
+                <div class="promo-text-content">
+                    <span class="text-orange fw-bold text-uppercase small letter-spacing-1">Colección 2025</span>
+                    <h3 class="fw-bold display-5 text-dark">Apple Watch</h3>
+                    <p class="text-muted fs-5">Tu salud, llevada al límite.</p>
+                    <a href="/Productos" class="text-dark text-decoration-none fw-bold link-hover">Descubrir <i class="bi bi-chevron-right text-orange"></i></a>
+                </div>
+                <div class="promo-img-container mt-4">
+                    <img src="/images/home/applewatch.png" class="img-fluid" alt="Apple Watch">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="intelligence-section py-5">
+    <div class="container py-5 text-center">
+        <div class="ai-icon-wrapper mb-4">
+            <i class="bi bi-stars fs-1 text-orange"></i>
+        </div>
+        <h2 class="display-3 fw-bold">Apple Intelligence</h2>
+        <p class="lead text-muted mx-auto" style="max-width: 700px;">
+            La inteligencia personal que te entiende. Totalmente integrada en todos los productos de la línea 2025 para hacer tu vida más simple.
+        </p>
+    </div>
+</section>
+
+<style>
+    :root {
+        --apple-orange: #ff6a00;
+        --radius-apple: 32px;
+        --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background-color: #000;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .hero-section {
+        background: #000;
+        color: #fff;
+        padding-top: 80px;
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .hero-content {
+        z-index: 2;
+        max-width: 800px;
+    }
+
+    .main-title {
+        font-size: clamp(3rem, 8vw, 5rem);
+        letter-spacing: -2px;
+    }
+
+    .badge-new {
+        color: var(--apple-orange);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 2px;
+        font-size: 0.85rem;
+    }
+
+    .btn-link-apple {
+        color: #0066cc;
+        font-size: 1.2rem;
+        font-weight: 500;
+        text-decoration: none;
+        margin-right: 20px;
+    }
+
+    .btn-apple-dark {
+        background: #fff;
+        color: #000;
+        border-radius: 50px;
+        padding: 12px 35px;
+        font-weight: 600;
+        border: none;
+    }
+
+    .hero-image-box {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        margin-top: 40px;
+        background: #000;
+    }
+
+    .hero-img {
+        max-width: 100%;
+        height: auto;
+        max-height: 520px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+        animation: fadeInUp 1.2s ease-out;
+    }
+
+    .promo-box {
+        border-radius: var(--radius-apple);
+        min-height: 580px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: var(--transition);
+    }
+
+    .promo-macbook {
+        background-color: #000;
+    }
+
+    .promo-watch {
+        background-color: #fff;
+        border: 1px solid #f2f2f2;
+    }
+
+    .promo-box:hover {
+        transform: scale(1.015);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    .promo-img-container {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-top: 20px;
+    }
+
+        .promo-img-container img {
+            max-height: 300px;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+
+    .promo-box:hover .promo-img-container img {
+        transform: scale(1.05);
+    }
+
+    .intelligence-section {
+        background: #fff;
+        color: #1d1d1f;
+    }
+
+    .text-orange {
+        color: var(--apple-orange) !important;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .promo-box {
+            min-height: 500px;
+            padding: 30px !important;
+        }
+
+        .main-title {
+            font-size: 2.8rem;
+        }
+    }
+</style>

@@ -1,232 +1,374 @@
-﻿@model ParteFrontProyectoDSW1.Controllers.CarritoViewModel
+﻿@model ParteFrontProyectoDSW1.Controllers.CartController.CarritoViewModel
 @using ParteFrontProyectoDSW1.Contracts.Entities
-@using ParteFrontProyectoDSW1.Contracts.Dtos
-@using ParteFrontProyectoDSW1.Helpers
 
 @{
-    ViewData["Title"] = "Mi Carrito";
+    ViewData["Title"] = "Tu Carrito - Apple Store Ecommerce";
 }
 
-<div class="container mt-5">
-    <h2 class="mb-4 text-center fw-bold text-primary">Mi Carrito de Compras</h2>
+<div class="container mt-5 pb-5">
+    <!-- Encabezado Estilo Apple -->
+    <div class="cart-header mb-5">
+        <h1 class="fw-bold display-5">Revisa tu <span>bolsa.</span></h1>
+        <p class="text-muted">El envío es gratuito en todos los pedidos de la Apple Store.</p>
+    </div>
 
-    @if (TempData["Error"] != null)
+    @if (Model.Items == null || !Model.Items.Any())
     {
-        <div class="alert alert-danger">@TempData["Error"]</div>
-    }
-
-    @if (!Model.Items.Any())
-    {
-        <div class="alert alert-info text-center fw-semibold">Tu carrito está vacío.</div>
+        <!-- Estado Vacío -->
+        <div class="empty-cart-container text-center py-5">
+            <div class="empty-cart-icon mb-4">
+                <i class="bi bi-bag-x"></i>
+            </div>
+            <h2 class="fw-bold">Tu bolsa está vacía.</h2>
+            <p class="text-muted mb-4">¿No sabes por dónde empezar? Explora nuestros productos más recientes.</p>
+            <a asp-controller="Productos" asp-action="Index" class="btn btn-primary btn-apple-lg">
+                Continuar comprando
+            </a>
+        </div>
     }
     else
     {
-        <div class="table-responsive shadow-sm rounded bg-white p-3">
-            <table class="table table-bordered align-middle carrito-table mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Producto</th>
-                        <th>Precio</th>
-                        <th>Cantidad</th>
-                        <th>Subtotal</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="carritoBody">
+        <div class="row g-5">
+            <!-- LISTA DE PRODUCTOS (Izquierda) -->
+            <div class="col-lg-8">
+                <div class="cart-items-list">
                     @foreach (var item in Model.Items)
                     {
-                        <tr data-id="@item.IdProducto">
-                            <td class="fw-semibold">@item.Nombre</td>
-                            <td class="fw-bold text-primary">S/ @item.Precio.ToString("0.00")</td>
-                            <td>
-                                <input type="number" class="form-control cantidad-input" min="1" value="@item.Cantidad" />
-                            </td>
-                            <td class="subtotal fw-bold text-success">S/ @item.SubTotal.ToString("0.00")</td>
-                            <td>
-                                <button class="btn btn-danger btn-sm btn-eliminar">
-                                    <i class="bi bi-trash"></i> Eliminar
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                        <div class="cart-item-row" data-id="@item.IdProducto">
+                            <div class="item-image-container">
+                                <img src="@Url.Content(string.IsNullOrEmpty(item.ImagenUrl) ? "/images/productos/default-product.png" : item.ImagenUrl)"
+                                     alt="@item.Nombre"
+                                     class="img-fluid item-img-render" />
+                            </div>
 
-        <div class="d-flex justify-content-end align-items-center mt-4 gap-3 flex-wrap">
-            <h4 class="fw-bold">Total: <span id="totalCarrito">S/ @Model.Items.Sum(x => x.SubTotal).ToString("0.00")</span></h4>
-            <form asp-action="Checkout" method="post">
-                <button type="submit" class="btn btn-success btn-lg">Finalizar compra</button>
-            </form>
+                            <div class="item-details">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="me-3">
+                                        <h3 class="item-title">@item.Nombre</h3>
+                                        <p class="item-meta mb-0 text-muted">Precio Unitario: S/ @item.Precio.ToString("N2")</p>
+                                    </div>
+                                    <p class="item-subtotal fw-bold h4 mb-0">S/ @item.SubTotal.ToString("N2")</p>
+                                </div>
+
+                                <div class="item-actions-row">
+                                    <div class="quantity-picker-wrapper">
+                                        <button class="qty-btn minus" type="button"><i class="bi bi-dash"></i></button>
+                                        <input type="number" class="qty-input" value="@item.Cantidad" min="1" readonly>
+                                        <button class="qty-btn plus" type="button"><i class="bi bi-plus"></i></button>
+                                    </div>
+
+                                    <button class="btn-remove-item" type="button" onclick="eliminarProducto(@item.IdProducto)">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- RESUMEN DE COMPRA (Derecha) -->
+            <div class="col-lg-4">
+                <div class="order-summary-card">
+                    <h3 class="summary-title mb-4">Resumen</h3>
+
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>S/ @Model.Items.Sum(x => x.SubTotal).ToString("N2")</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <span class="text-success fw-medium">Gratis</span>
+                    </div>
+
+                    <hr class="my-4 opacity-10">
+
+                    <div class="summary-row total-row mb-4">
+                        <span>Total</span>
+                        <span id="totalCarrito">S/ @Model.Items.Sum(x => x.SubTotal).ToString("N2")</span>
+                    </div>
+
+                    <form asp-action="Checkout" method="post">
+                        <button type="submit" class="btn btn-primary w-100 btn-apple-lg py-3 shadow-sm">
+                            Pagar pedido
+                        </button>
+                    </form>
+
+                    <p class="text-center text-muted small mt-4 mb-0">
+                        <i class="bi bi-shield-check me-1"></i> Pago seguro y encriptado
+                    </p>
+                </div>
+            </div>
         </div>
     }
 </div>
 
-<!-- =========================
-     ESTILOS PROFESIONALES
-========================= -->
 <style>
     :root {
-        --primary: #ff6a00;
-        --success: #28a745;
-        --danger: #dc3545;
-        --bg-light: #f5f5f7;
-        --text-dark: #1d1d1f;
-        --muted: #6e6e73;
-        --border-radius: 12px;
+        --apple-orange: #ff6a00;
+        --apple-bg: #f5f5f7;
+        --apple-text: #1d1d1f;
+        --apple-muted: #86868b;
+        --border-color: #d2d2d7;
+        --radius: 20px;
     }
 
     body {
-        background-color: var(--bg-light);
+        background-color: var(--apple-bg);
         font-family: 'Inter', sans-serif;
     }
 
-    .carrito-table th, .carrito-table td {
-        vertical-align: middle;
+    .cart-header h1 span {
+        color: var(--apple-orange);
+    }
+
+    .item-image-container {
+        width: 160px;
+        height: 160px;
+        background: #fff;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    .item-img-render {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .cart-item-row {
+        display: flex;
+        gap: 30px;
+        padding: 35px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        animation: slideIn 0.5s ease;
+    }
+
+    .item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .item-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--apple-text);
+        margin-bottom: 4px;
+    }
+
+    .quantity-picker-wrapper {
+        display: inline-flex;
+        align-items: center;
+        background: #fff;
+        border: 1px solid #d2d2d7;
+        border-radius: 12px;
+        padding: 4px;
+    }
+
+    .qty-btn {
+        background: transparent;
+        border: none;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+
+        .qty-btn:hover {
+            background: #f5f5f7;
+        }
+
+    .qty-input {
+        width: 40px;
+        border: none;
         text-align: center;
+        font-weight: 600;
+        outline: none;
+        background: transparent;
+    }
+
+    .btn-remove-item {
+        background: none;
+        border: none;
+        color: #0066cc;
         font-size: 0.95rem;
+        font-weight: 500;
+        padding: 0;
     }
 
-    .carrito-table tbody tr {
-        transition: background-color 0.3s, transform 0.3s;
+        .btn-remove-item:hover {
+            text-decoration: underline;
+        }
+
+    .item-actions-row {
+        display: flex;
+        align-items: center;
+        gap: 25px;
     }
 
-        .carrito-table tbody tr:hover {
-            background-color: rgba(255, 106, 0, 0.08);
+    .order-summary-card {
+        background: #fff;
+        padding: 40px;
+        border-radius: 28px;
+        position: sticky;
+        top: 100px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+    }
+
+    .summary-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 18px;
+        font-size: 1.1rem;
+    }
+
+    .total-row {
+        font-size: 1.8rem;
+        font-weight: 800;
+        border-top: 1px solid #f5f5f7;
+        pt-3;
+        margin-top: 10px;
+    }
+
+    .btn-apple-lg {
+        background-color: var(--apple-orange);
+        border: none;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-apple-lg:hover {
+            background-color: #e55f00;
             transform: translateY(-2px);
         }
 
-    .cantidad-input {
-        width: 70px;
-        text-align: center;
-        border-radius: var(--border-radius);
-        border: 1px solid #ccc;
-        transition: all 0.2s;
+    .empty-cart-icon {
+        font-size: 6rem;
+        color: var(--apple-muted);
+        opacity: 0.4;
     }
 
-        .cantidad-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 6px rgba(255, 106, 0, 0.3);
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
         }
 
-    .btn-eliminar {
-        background-color: var(--danger);
-        color: #fff;
-        border-radius: var(--border-radius);
-        padding: 0.25rem 0.6rem;
-        transition: all 0.3s;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
-        .btn-eliminar:hover {
-            background-color: #b02a37;
+    @@media (max-width: 768px) {
+        .cart-item-row {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
 
-    .btn-success {
-        background-color: var(--primary);
-        border: none;
-        border-radius: var(--border-radius);
-        padding: 0.55rem 1.5rem;
-        font-size: 1rem;
-        transition: all 0.3s;
-    }
-
-        .btn-success:hover {
-            background-color: #e55f00;
+        .item-actions-row {
+            justify-content: center;
         }
 
-    #totalCarrito {
-        color: var(--success);
-        font-size: 1.3rem;
-    }
-
-    .alert-info, .alert-danger {
-        border-radius: var(--border-radius);
-        text-align: center;
-        font-weight: 500;
-    }
-
-    /* Responsive */
-    @@media (max-width: 576px) {
-        .carrito-table th, .carrito-table td
-
-    {
-        font-size: 0.85rem;
-    }
-
-    .btn-success, .btn-eliminar {
-        font-size: 0.85rem;
-        padding: 0.4rem 1rem;
-    }
-
+        .item-image-container {
+            margin: 0 auto;
+        }
     }
 </style>
 
-<!-- =========================
-     SCRIPT DE FUNCIONALIDAD
-========================= -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    function actualizarSubtotalFila(fila, cantidad, precio) {
-        const subtotal = cantidad * precio;
-        fila.find('.subtotal').text('S/ ' + subtotal.toFixed(2));
-    }
+    document.addEventListener('DOMContentLoaded', function () {
+        let isProcessing = false; // Bloqueo para evitar peticiones múltiples
 
-    function actualizarTotal() {
-        let total = 0;
-        $('#carritoBody tr').each(function () {
-            const subtotalText = $(this).find('.subtotal').text().replace('S/ ', '');
-            total += parseFloat(subtotalText);
-        });
-        $('#totalCarrito').text(total.toFixed(2));
-    }
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', async function (e) {
+                e.preventDefault();
 
-    $(document).ready(function () {
-        // Cambiar cantidad
-        $('.cantidad-input').on('change', function () {
-            const fila = $(this).closest('tr');
-            const idProducto = fila.data('id');
-            let cantidad = parseInt($(this).val());
-            if (cantidad < 1) cantidad = 1;
-            $(this).val(cantidad);
+                if (isProcessing) return;
 
-            const precio = parseFloat(fila.find('td:nth-child(2)').text().replace('S/ ', ''));
+                const row = this.closest('.cart-item-row');
+                const idProducto = row.dataset.id;
+                const input = row.querySelector('.qty-input');
+                let cantidadActualEnInput = parseInt(input.value);
 
-            // Llamada AJAX para actualizar en API
-            $.ajax({
-                url: '/Cart/Add',
-                type: 'POST',
-                data: { idProducto: idProducto, cantidad: cantidad },
-                success: function () {
-                    actualizarSubtotalFila(fila, cantidad, precio);
-                    actualizarTotal();
-                },
-                error: function () {
-                    alert('Error al actualizar la cantidad.');
+                // LOGICA: Enviamos el diferencial (1 o -1)
+                let delta = 0;
+                if (this.classList.contains('plus')) {
+                    delta = 1;
+                } else if (this.classList.contains('minus') && cantidadActualEnInput > 1) {
+                    delta = -1;
                 }
-            });
-        });
 
-        // Eliminar producto
-        $('.btn-eliminar').on('click', function () {
-            const fila = $(this).closest('tr');
-            const idProducto = fila.data('id');
+                if (delta !== 0) {
+                    try {
+                        isProcessing = true;
+                        // Opcional: mostrar un estado de carga sutil
+                        this.style.opacity = '0.5';
 
-            $.ajax({
-                url: '/Cart/Remove',
-                type: 'POST',
-                data: { idProducto: idProducto },
-                success: function () {
-                    fila.remove();
-                    actualizarTotal();
-                    if ($('#carritoBody tr').length === 0) {
-                        location.reload(); // recargar para mostrar "carrito vacío"
+                        // Llamamos a TU controlador del Front que a su vez llama al API
+                        // IMPORTANTE: Enviamos 'delta' (1 o -1)
+                        const response = await fetch(`/Cart/AddAjax?idProducto=${idProducto}&cantidad=${delta}`, {
+                            method: 'POST'
+                        });
+
+                        if (response.ok) {
+                            // Recargamos para ver los totales actualizados desde la DB
+                            location.reload();
+                        } else {
+                            alert("Error al actualizar el carrito");
+                            isProcessing = false;
+                            this.style.opacity = '1';
+                        }
+                    } catch (err) {
+                        console.error("Error:", err);
+                        isProcessing = false;
                     }
-                },
-                error: function () {
-                    alert('Error al eliminar el producto.');
                 }
             });
         });
     });
+
+    async function eliminarProducto(idProducto) {
+        const confirm = await Swal.fire({
+            title: '¿Quitar de la bolsa?',
+            text: "Este artículo se eliminará de tu carrito.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff6a00',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (confirm.isConfirmed) {
+            try {
+                // Asegúrate que esta ruta apunte a tu controlador de Front que llama al API eliminar-producto
+                const res = await fetch('/Cart/Remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `idProducto=${idProducto}`
+                });
+                if (res.ok) location.reload();
+            } catch (e) { console.error("Error al eliminar:", e); }
+        }
+    }
 </script>
