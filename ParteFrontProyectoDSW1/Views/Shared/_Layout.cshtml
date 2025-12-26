@@ -1,7 +1,6 @@
 ﻿@using ParteFrontProyectoDSW1.Contracts.Dtos
 @using ParteFrontProyectoDSW1.Helpers
 @{
-    // Obtenemos el usuario de la sesión para la lógica de la UI
     var usuario = Context.Session.GetObject<LoginResponseDto>("CurrentUser");
 }
 
@@ -10,9 +9,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Apple Store Ecommerce</title>
+    <title>@ViewData["Title"] - Tienda FinoFac</title>
 
-    <!-- Fuentes e Iconos -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -37,7 +35,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* NAVBAR PREMIUM */
         .navbar {
             background-color: var(--nav-bg) !important;
             backdrop-filter: blur(20px);
@@ -85,7 +82,6 @@
             border: 2px solid #fff;
         }
 
-        /* DROPDOWNS */
         .user-dropdown-btn {
             background: transparent;
             border: none;
@@ -118,7 +114,6 @@
                 color: var(--primary-color);
             }
 
-        /* FOOTER */
         footer {
             background: #fff;
             border-top: 1px solid rgba(0,0,0,0.05);
@@ -161,15 +156,18 @@
         }
 
         @@keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
-            }
+            from
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         }
 
         .animate-fade {
@@ -183,7 +181,7 @@
         <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container">
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-apple me-2"></i>Apple Store <span>Ecommerce</span>
+                    <i class="bi bi-apple me-2"></i>Tienda FinoFac <span>Ecommerce</span>
                 </a>
 
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
@@ -209,7 +207,6 @@
                     </ul>
 
                     <div class="d-flex align-items-center gap-3">
-                        @* El carrito solo se muestra si NO es administrador *@
                         @if (usuario == null || usuario.Rol != "ADMIN")
                         {
                             <a id="btnCarrito" asp-controller="Cart" asp-action="Index" class="nav-link nav-icon px-2">
@@ -261,8 +258,8 @@
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-4 text-center text-lg-start">
-                    <h5 class="navbar-brand mb-4 d-block"><i class="bi bi-apple me-2"></i>Apple Store <span>Ecommerce</span></h5>
-                    <p class="text-muted small">Tu destino premium para la tecnología Apple en Perú. Garantía oficial y soporte especializado.</p>
+                    <h5 class="navbar-brand mb-4 d-block"><i class="bi bi-apple me-2"></i>Tienda FinoFac <span>Ecommerce</span></h5>
+                    <p class="text-muted small">Tu destino premium para tecnología en Perú. Garantía oficial y soporte especializado.</p>
                 </div>
                 <div class="col-6 col-lg-2 offset-lg-2">
                     <h6 class="footer-title">Tienda</h6>
@@ -276,12 +273,12 @@
                 </div>
                 <div class="col-lg-2 text-center text-lg-start">
                     <h6 class="footer-title">Contacto</h6>
-                    <p class="small text-muted mb-1">ventas@applestore.com</p>
+                    <p class="small text-muted mb-1">ventas@finofac.com</p>
                     <p class="small text-muted">Lima, Perú</p>
                 </div>
             </div>
             <div class="footer-bottom text-center">
-                <p class="mb-0">© @DateTime.Now.Year Apple Store Ecommerce. Todos los derechos reservados.</p>
+                <p class="mb-0">© @DateTime.Now.Year Tienda FinoFac. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>

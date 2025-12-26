@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ParteFrontProyectoDSW1")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+53c4eb92950b4cb2d94c423239aed346d93422d1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8f111f94a576c8c600a58a2086c54ac6177f5e68")]
 [assembly: System.Reflection.AssemblyProductAttribute("ParteFrontProyectoDSW1")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ParteFrontProyectoDSW1")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
