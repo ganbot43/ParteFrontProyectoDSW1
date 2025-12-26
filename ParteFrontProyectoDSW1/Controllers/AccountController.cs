@@ -18,9 +18,6 @@ namespace ParteFrontProyectoDSW1.Controllers
             _httpFactory = httpFactory;
         }
 
-        // =====================
-        // LOGIN
-        // =====================
         [HttpGet]
         public IActionResult Login()
         {
@@ -50,12 +47,10 @@ namespace ParteFrontProyectoDSW1.Controllers
                     ModelState.AddModelError(string.Empty, "Respuesta inesperada del servidor.");
                     return View(model);
                 }
-
-                // Establecer la información del usuario en la cookie de autenticación
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, loginApiResp.Usuario.Nombre),
-                    new Claim(ClaimTypes.Role, loginApiResp.Usuario.Rol) // Aquí el rol, por ejemplo "ADMIN"
+                    new Claim(ClaimTypes.Role, loginApiResp.Usuario.Rol) 
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -76,9 +71,6 @@ namespace ParteFrontProyectoDSW1.Controllers
             }
         }
 
-        // =====================
-        // REGISTER
-        // =====================
         [HttpGet]
         public IActionResult Register()
         {
@@ -88,17 +80,14 @@ namespace ParteFrontProyectoDSW1.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(UsuarioLoginDto model)
         {
-            // 1. Asignar valores por defecto que no vienen del formulario
-            model.Rol = "CLIENTE"; // O el rol que manejes por defecto
-            model.Activo = true;   // Normalmente un usuario nuevo debe estar activo
+            model.Rol = "CLIENTE"; 
+            model.Activo = true;  
 
-            // 2. Quitar el error de validación del Rol si es que existe (porque lo acabamos de llenar)
             ModelState.Clear();
             TryValidateModel(model);
 
             if (!ModelState.IsValid)
             {
-                // Si entra aquí, pon un breakpoint para ver qué campo sigue fallando
                 return View(model);
             }
 
@@ -110,7 +99,6 @@ namespace ParteFrontProyectoDSW1.Controllers
 
                 if (!resp.IsSuccessStatusCode)
                 {
-                    // LEER EL ERROR QUE VIENE DE LA API
                     var errorDetail = await resp.Content.ReadAsStringAsync();
                     ModelState.AddModelError(string.Empty, $"Error del servidor: {errorDetail}");
                     return View(model);
@@ -125,18 +113,12 @@ namespace ParteFrontProyectoDSW1.Controllers
             }
         }
 
-        // =====================
-        // LOGOUT
-        // =====================
         public IActionResult Logout()
         {
             HttpContext.Session.RemoveObject(SessionUserKey);
             return RedirectToAction("Index", "Productos");
         }
 
-        // =====================
-        // PROPIEDAD PARA USUARIO ACTUAL
-        // =====================
         public LoginResponseDto? CurrentUser => HttpContext.Session.GetObject<LoginResponseDto>(SessionUserKey);
     }
 }

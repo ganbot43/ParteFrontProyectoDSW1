@@ -29,11 +29,9 @@ namespace ParteFrontProyectoDSW1.Controllers
 
             try
             {
-                // Obtener carrito activo
                 idCarrito = await client.GetFromJsonAsync<int>($"api/carrito/obtener-activo/{user.IdUsuario}");
                 HttpContext.Session.SetInt32("IdCarrito", idCarrito);
 
-                // Obtener los detalles del carrito
                 detalles = await client.GetFromJsonAsync<IEnumerable<CarritoDetalle>>($"api/carrito/ver/{idCarrito}");
             }
             catch (Exception ex)
@@ -101,7 +99,7 @@ namespace ParteFrontProyectoDSW1.Controllers
             return Json(new { success = resp.IsSuccessStatusCode, total });
         }
 
-        // GET: get cart count (para badge del layout)
+        // GET: get cart count
         [HttpGet]
         public async Task<IActionResult> TotalItems()
         {
@@ -143,8 +141,6 @@ namespace ParteFrontProyectoDSW1.Controllers
                 TempData["ErrorCheckout"] = $"Error generando la orden: {resp.StatusCode}";
                 return RedirectToAction("Index");
             }
-
-            // Buscar la última orden pendiente del usuario
             var ordenes = await client.GetFromJsonAsync<List<Orden>>(
                 $"api/orden/por-usuario/{user.IdUsuario}"
             );

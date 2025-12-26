@@ -26,7 +26,6 @@ namespace ParteFrontProyectoDSW1.Repositories
             }
             catch (Exception ex)
             {
-                // Aquí puedes loguear el error o lanzar una excepción con más contexto
                 throw new Exception($"Error en sp_Carrito_ObtenerActivo: {ex.Message}", ex);
             }
         }
@@ -43,7 +42,6 @@ namespace ParteFrontProyectoDSW1.Repositories
             }
             catch (Exception ex)
             {
-                // Aquí puedes loguear el error o lanzar una excepción con más contexto
                 throw new Exception($"Error en sp_Carrito_AgregarProducto: {ex.Message}", ex);
             }
         }

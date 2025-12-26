@@ -6,7 +6,6 @@
 
 <div class="login-page-container">
     <div class="login-box">
-        <!-- Logo y Encabezado -->
         <div class="login-header mb-5 text-center">
             <div class="apple-icon-wrapper mb-4">
                 <i class="bi bi-apple"></i>
@@ -15,39 +14,33 @@
             <p class="text-muted">Gestiona tus pedidos y descubre ofertas exclusivas.</p>
         </div>
 
-        <!-- Formulario -->
         <form asp-action="Login" method="post" class="needs-validation">
-            <!-- Email con Floating Label -->
+
             <div class="form-floating mb-3">
                 <input asp-for="Email" class="form-control custom-input" placeholder="nombre@ejemplo.com" autocomplete="email" required />
                 <label asp-for="Email">Correo electrónico</label>
                 <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
 
-            <!-- Password con Floating Label -->
             <div class="form-floating mb-3">
                 <input asp-for="PasswordHash" type="password" class="form-control custom-input" placeholder="Contraseña" autocomplete="current-password" required />
                 <label asp-for="PasswordHash">Contraseña</label>
                 <span asp-validation-for="PasswordHash" class="text-danger small"></span>
             </div>
 
-            <!-- Link de Olvidé mi contraseña -->
             <div class="text-end mb-4">
                 <a href="#" class="text-decoration-none small text-primary-orange fw-medium">¿Olvidaste tu contraseña?</a>
             </div>
 
-            <!-- Botón de Acción -->
             <button type="submit" class="btn btn-login-submit py-3 mb-4">
                 Continuar
             </button>
         </form>
 
-        <!-- Divisor -->
         <div class="divider mb-4">
             <span>o</span>
         </div>
 
-        <!-- Footer del Login -->
         <div class="login-footer text-center">
             <p class="mb-0 text-muted">¿No tienes una cuenta?</p>
             <a asp-action="Register" asp-controller="Account" class="register-link">Crea la tuya ahora</a>
@@ -69,7 +62,6 @@
         --radius-apple: 18px;
     }
 
-    /* Contenedor Principal */
     .login-page-container {
         min-height: 70vh;
         display: flex;
@@ -78,19 +70,16 @@
         padding: 20px;
     }
 
-    /* Caja de Login */
     .login-box {
         width: 100%;
         max-width: 440px;
         padding: 40px;
         background: #fff;
         border-radius: 30px;
-        /* Sombra mucho más suave y difusa */
         box-shadow: 0 20px 60px rgba(0,0,0,0.05);
         animation: fadeIn 0.6s ease-out;
     }
 
-    /* Icono de Apple */
     .apple-icon-wrapper {
         font-size: 3rem;
         color: var(--apple-text);
@@ -100,7 +89,6 @@
         color: var(--apple-orange);
     }
 
-    /* Inputs Personalizados (Floating Labels) */
     .form-floating > .custom-input {
         height: 60px;
         border-radius: 12px;
@@ -118,7 +106,6 @@
             background-color: #fff;
         }
 
-    /* Botón Submit */
     .btn-login-submit {
         width: 100%;
         background-color: var(--apple-orange);
@@ -136,7 +123,6 @@
             box-shadow: 0 8px 20px rgba(255, 106, 0, 0.2);
         }
 
-    /* Divider */
     .divider {
         display: flex;
         align-items: center;
@@ -157,7 +143,6 @@
             letter-spacing: 1px;
         }
 
-    /* Enlaces */
     .text-primary-orange {
         color: var(--apple-orange);
     }
@@ -187,11 +172,10 @@
         }
     }
 
-    /* Ajustes móviles */
     @@media (max-width: 576px) {
         .login-box {
             padding: 30px 20px;
-            box-shadow: none; /* En móviles queda mejor plano o con borde suave */
+            box-shadow: none; 
             background: transparent;
         }
     }

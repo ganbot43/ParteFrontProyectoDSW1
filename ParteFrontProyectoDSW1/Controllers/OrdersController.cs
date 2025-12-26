@@ -15,7 +15,6 @@ namespace ParteFrontProyectoDSW1.Controllers
             _httpFactory = httpFactory;
         }
 
-        // VISTA PRINCIPAL (solo carga la vista)
         public IActionResult Index()
         {
             var user = HttpContext.Session.GetObject<UsuarioLoginDto>(SessionUserKey);
@@ -25,7 +24,6 @@ namespace ParteFrontProyectoDSW1.Controllers
             return View();
         }
 
-        // AJAX → HISTORIAL DE PAGOS
         [HttpGet]
         public async Task<IActionResult> PagoHistorialAjax()
         {

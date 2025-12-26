@@ -16,9 +16,6 @@ namespace ParteFrontProyectoDSW1.Controllers
             _httpFactory = httpFactory;
         }
 
-        // =========================
-        // INDEX: lista todos, por categoría o búsqueda
-        // =========================
         public async Task<IActionResult> Index(int? idCategoria = null, string search = "")
         {
             var client = _httpFactory.CreateClient("ApiWeb");
@@ -29,25 +26,22 @@ namespace ParteFrontProyectoDSW1.Controllers
             {
                 if (!string.IsNullOrEmpty(search))
                 {
-                    // Llamar al endpoint de búsqueda
                     productos = await client.GetFromJsonAsync<IEnumerable<Producto>>(
                         $"api/productos/buscar?nombre={Uri.EscapeDataString(search)}"
                     );
                 }
                 else if (idCategoria.HasValue)
                 {
-                    // Filtrar por categoría
                     productos = await client.GetFromJsonAsync<IEnumerable<Producto>>(
                         $"api/productos/por-categoria/{idCategoria.Value}"
                     );
                 }
                 else
                 {
-                    // Traer todos los productos
+
                     productos = await client.GetFromJsonAsync<IEnumerable<Producto>>("api/productos");
                 }
 
-                // Traer categorías
                 var categorias = await client.GetFromJsonAsync<IEnumerable<Categoria>>("api/categorias") ?? Enumerable.Empty<Categoria>();
                 ViewBag.Categorias = categorias;
             }
@@ -59,9 +53,6 @@ namespace ParteFrontProyectoDSW1.Controllers
             return View(productos ?? Enumerable.Empty<Producto>());
         }
 
-        // =========================
-        // DETAILS: detalle de un producto
-        // =========================
         public async Task<IActionResult> Details(int id)
         {
             var client = _httpFactory.CreateClient("ApiWeb");
@@ -70,9 +61,7 @@ namespace ParteFrontProyectoDSW1.Controllers
             return View(producto);
         }
 
-        // =========================
-        // GET: subir imagen
-        // =========================
+
         [HttpGet]
         public IActionResult UploadImage(int id)
         {
@@ -80,9 +69,6 @@ namespace ParteFrontProyectoDSW1.Controllers
             return View();
         }
 
-        // =========================
-        // POST: enviar imagen a API
-        // =========================
         [HttpPost]
         public async Task<IActionResult> UploadImage(int id, IFormFile file)
         {

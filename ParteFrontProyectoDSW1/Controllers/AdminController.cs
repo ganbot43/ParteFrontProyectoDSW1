@@ -6,7 +6,6 @@ using System.Net.Http.Json;
 
 namespace ParteFrontProyectoDSW1.Controllers
 {
-    // Solo permite el acceso si el usuario está autenticado con el rol ADMIN
     [Authorize(Roles = "ADMIN")]
     public class AdminController : Controller
     {
@@ -17,22 +16,37 @@ namespace ParteFrontProyectoDSW1.Controllers
             _httpFactory = httpFactory;
         }
 
-        // Vista de lista de pagos (Diseño de tabla limpia)
         public async Task<IActionResult> Pagos()
         {
             try
             {
                 var client = _httpFactory.CreateClient("ApiWeb");
-                var pagos = await client.GetFromJsonAsync<List<Pago>>("api/Pago");
+
+                var pagosTask = client.GetFromJsonAsync<List<Pago>>("api/Pago");
+                var detallesTask = client.GetFromJsonAsync<List<PagoDetalladoDto>>("api/Pago/detallado");
+
+                await Task.WhenAll(pagosTask, detallesTask);
+
+                var pagos = await pagosTask ?? new List<Pago>();
+                var detalles = await detallesTask ?? new List<PagoDetalladoDto>();
+
+                var productoEstrella = detalles
+                    .GroupBy(d => d.Producto)
+                    .OrderByDescending(g => g.Sum(x => x.Cantidad))
+                    .Select(g => g.Key)
+                    .FirstOrDefault();
+
+                ViewBag.ProductoMasVendido = productoEstrella ?? "Sin ventas";
+
                 return View(pagos);
             }
             catch (Exception)
             {
+                ViewBag.ProductoMasVendido = "Error al cargar";
                 return View(new List<Pago>());
             }
         }
 
-        // Vista Detallada de Pagos (Recomendada para gestión)
         public async Task<IActionResult> PagosDetallado()
         {
             try
@@ -47,20 +61,19 @@ namespace ParteFrontProyectoDSW1.Controllers
             }
         }
 
-        // Obtener detalle por AJAX para Modal
         [HttpGet]
         public async Task<IActionResult> DetallePago(int idPago)
         {
             try
             {
                 var client = _httpFactory.CreateClient("ApiWeb");
-                // Obtén todos los pagos detallados
                 var detalles = await client.GetFromJsonAsync<List<PagoDetalladoDto>>("api/Pago/detallado");
-                // Busca el pago por idPago
-                var detalle = detalles?.FirstOrDefault(x => x.IdPago == idPago);
-                if (detalle == null)
+                var detallesPago = detalles?.Where(x => x.IdPago == idPago).ToList();
+
+                if (detallesPago == null || !detallesPago.Any())
                     return NotFound();
-                return Json(detalle);
+
+                return Json(detallesPago);
             }
             catch (Exception)
             {
