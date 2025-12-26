@@ -8,16 +8,14 @@
 <div class="container mt-5 pb-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <!-- Header de Pasarela -->
             <div class="text-center mb-5">
                 <h1 class="fw-bold">Finaliza tu <span>pedido.</span></h1>
                 <p class="text-muted">Orden de compra #@idOrden — Revisión final antes del pago</p>
             </div>
 
             <div class="row g-4">
-                <!-- COLUMNA IZQUIERDA: RESUMEN DE PRODUCTOS -->
                 <div class="col-md-7">
-                    <div class="payment-card p-4">
+                    <div class="payment-card p-4 h-100">
                         <h5 class="fw-bold mb-4">Resumen del pedido</h5>
                         <div class="table-responsive">
                             <table class="table table-borderless align-middle checkout-table">
@@ -50,18 +48,16 @@
                     </div>
                 </div>
 
-                <!-- COLUMNA DERECHA: MÉTODO DE PAGO -->
                 <div class="col-md-5">
-                    <div class="payment-card p-4">
+                    <div class="payment-card p-4 h-100">
                         <h5 class="fw-bold mb-4">Método de pago</h5>
 
                         <form asp-action="Registrar" method="post" id="formPago">
-                            <input type="hidden" name="idOrden" value="@idOrden" />
+                            <input type="hidden" name="idOrden" id="hiddenIdOrden" value="@idOrden" />
                             <input type="hidden" name="monto" value="@total" />
                             <input type="hidden" name="metodo" id="inputMetodo" required />
 
-                            <!-- Selección Visual de Métodos con tus imágenes -->
-                            <div class="payment-methods-grid">
+                            <div class="payment-methods-grid mb-4">
                                 <div class="method-item" data-value="Tarjeta">
                                     <div class="icon-box"><i class="bi bi-credit-card"></i></div>
                                     <span>Tarjeta</span>
@@ -84,25 +80,65 @@
                                 </div>
                             </div>
 
-                            <div class="security-info my-4 p-3 rounded-4">
+                            <div id="detallesPago" class="mb-4 d-none">
+                                <div class="p-3 rounded-4 border bg-apple-subtle">
+                                    <div id="camposTarjeta" class="d-none animate-fade">
+                                        <h6 class="fw-bold mb-3 small text-uppercase">Datos de la tarjeta</h6>
+                                        <div class="form-floating mb-2">
+                                            <input type="text" class="form-control custom-input" id="numTarjeta" placeholder="0000 0000 0000 0000">
+                                            <label>Número de tarjeta</label>
+                                        </div>
+                                        <div class="row g-2">
+                                            <div class="col-7">
+                                                <div class="form-floating">
+                                                    <input type="text" class="form-control custom-input" placeholder="MM/YY">
+                                                    <label>Expira (MM/YY)</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-5">
+                                                <div class="form-floating">
+                                                    <input type="password" class="form-control custom-input" placeholder="CVV">
+                                                    <label>CVV</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="camposMovil" class="d-none animate-fade">
+                                        <h6 class="fw-bold mb-3 small text-uppercase" id="tituloMovil">Confirmación</h6>
+                                        <p class="x-small text-muted mb-2">Escanea nuestro QR y adjunta los datos del pago:</p>
+                                        <div class="form-floating mb-2">
+                                            <input type="text" class="form-control custom-input" placeholder="999 999 999">
+                                            <label>Número de celular</label>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control custom-input" placeholder="12345678">
+                                            <label>Código de aprobación</label>
+                                        </div>
+                                    </div>
+
+                                    <div id="camposEfectivo" class="d-none animate-fade">
+                                        <div class="d-flex align-items-center gap-2 text-primary">
+                                            <i class="bi bi-info-circle-fill"></i>
+                                            <span class="small fw-bold">Pago contra entrega</span>
+                                        </div>
+                                        <p class="x-small text-muted mb-0 mt-1">Podrás pagar en efectivo o con POS al recibir tu pedido en casa.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="security-info mb-4 p-3 rounded-4">
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <i class="bi bi-shield-lock-fill text-success"></i>
-                                    <span class="small fw-bold">Pago 100% Seguro</span>
+                                    <span class="small fw-bold">Transacción Encriptada</span>
                                 </div>
-                                <p class="small text-muted mb-0">Protegemos tus datos con encriptación SSL.</p>
+                                <p class="x-small text-muted mb-0">Tu información financiera no se guarda en nuestros servidores.</p>
                             </div>
 
                             <button type="submit" class="btn btn-primary btn-apple-lg w-100 py-3" id="btnPagar" disabled>
                                 Confirmar y Pagar
                             </button>
                         </form>
-
-                        @if (TempData["Error"] != null)
-                        {
-                            <div class="alert alert-danger mt-3 small rounded-3">
-                                <i class="bi bi-exclamation-triangle me-2"></i> @TempData["Error"]
-                            </div>
-                        }
                     </div>
                 </div>
             </div>
@@ -114,8 +150,13 @@
     :root {
         --apple-orange: #ff6a00;
         --apple-bg: #f5f5f7;
-        --border-radius: 28px;
+        --apple-gray: #86868b;
+        --border-radius: 24px;
         --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background-color: var(--apple-bg);
     }
 
     h1 span {
@@ -125,21 +166,21 @@
     .payment-card {
         background: #ffffff;
         border-radius: var(--border-radius);
-        box-shadow: 0 10px 40px rgba(0,0,0,0.04);
-        border: 1px solid rgba(0,0,0,0.02);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+        border: 1px solid rgba(0,0,0,0.05);
     }
 
-    /* Tabla */
     .checkout-table thead th {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         text-transform: uppercase;
-        color: #86868b;
-        letter-spacing: 0.8px;
+        color: var(--apple-gray);
+        letter-spacing: 1px;
         padding-bottom: 15px;
+        border: none;
     }
 
     .checkout-table tbody td {
-        padding: 18px 0;
+        padding: 15px 0;
         border-bottom: 1px solid #f5f5f7;
     }
 
@@ -147,7 +188,10 @@
         color: var(--apple-orange);
     }
 
-    /* Grid de Métodos */
+    .x-small {
+        font-size: 0.75rem;
+    }
+
     .payment-methods-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -156,8 +200,8 @@
 
     .method-item {
         border: 2px solid #f2f2f7;
-        border-radius: 20px;
-        padding: 20px 10px;
+        border-radius: 18px;
+        padding: 15px 10px;
         text-align: center;
         cursor: pointer;
         transition: var(--transition);
@@ -168,48 +212,61 @@
     }
 
     .icon-box {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow: hidden;
     }
 
         .icon-box i {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             color: #1d1d1f;
         }
 
-    /* Estilo para tus imágenes JPG */
     .img-payment {
         width: 100%;
         height: 100%;
         object-fit: contain;
-        border-radius: 10px; /* Redondeado suave para las fotos de Yape/Plin */
+        border-radius: 8px;
     }
 
     .method-item span {
         font-weight: 600;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: #1d1d1f;
     }
 
     .method-item:hover {
+        background-color: #fafafa;
         border-color: #d2d2d7;
-        background-color: #fbfbfb;
     }
 
     .method-item.selected {
         border-color: var(--apple-orange);
-        background-color: rgba(255, 106, 0, 0.04);
+        background-color: rgba(255, 106, 0, 0.05);
     }
 
         .method-item.selected span {
             color: var(--apple-orange);
         }
 
-    /* Info seguridad */
+    .bg-apple-subtle {
+        background-color: #fbfbfb;
+        border: 1px dashed #d2d2d7 !important;
+    }
+
+    .custom-input {
+        border-radius: 12px !important;
+        border: 1px solid #d2d2d7 !important;
+        font-size: 0.9rem !important;
+    }
+
+        .custom-input:focus {
+            border-color: var(--apple-orange) !important;
+            box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.1) !important;
+        }
+
     .security-info {
         background: #fbfbfb;
         border: 1px solid #f2f2f7;
@@ -218,7 +275,7 @@
     .btn-apple-lg {
         background-color: var(--apple-orange);
         border: none;
-        border-radius: 16px;
+        border-radius: 14px;
         font-weight: 700;
         transition: var(--transition);
     }
@@ -226,13 +283,23 @@
         .btn-apple-lg:hover:not(:disabled) {
             background-color: #e55f00;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255,106,0,0.2);
         }
 
-        .btn-apple-lg:disabled {
-            background-color: #d2d2d7;
-            opacity: 0.6;
+    .animate-fade {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(5px);
         }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
 
 <script>
@@ -244,17 +311,92 @@
             const valor = this.dataset.value;
             document.getElementById('inputMetodo').value = valor;
             document.getElementById('btnPagar').disabled = false;
+
+            const contenedorDetalles = document.getElementById('detallesPago');
+            const divTarjeta = document.getElementById('camposTarjeta');
+            const divMovil = document.getElementById('camposMovil');
+            const divEfectivo = document.getElementById('camposEfectivo');
+            const tituloMovil = document.getElementById('tituloMovil');
+
+            contenedorDetalles.classList.remove('d-none');
+            divTarjeta.classList.add('d-none');
+            divMovil.classList.add('d-none');
+            divEfectivo.classList.add('d-none');
+
+            if (valor === 'Tarjeta') {
+                divTarjeta.classList.remove('d-none');
+            }
+            else if (valor === 'Yape' || valor === 'Plin') {
+                divMovil.classList.remove('d-none');
+                tituloMovil.innerText = `Confirmación de ${valor}`;
+            }
+            else if (valor === 'Efectivo') {
+                divEfectivo.classList.remove('d-none');
+            }
         });
     });
 
+    document.getElementById('numTarjeta')?.addEventListener('input', function (e) {
+        let v = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+        let matches = v.match(/\d{4,16}/g);
+        let match = matches && matches[0] || '';
+        let parts = [];
+        for (i=0, len=match.length; i<len; i+=4) {
+            parts.push(match.substring(i, i+4));
+        }
+        e.target.value = parts.length ? parts.join(' ') : v;
+    });
+
     document.getElementById('formPago').addEventListener('submit', function(e) {
+        e.preventDefault();
+
         Swal.fire({
             title: 'Procesando pago...',
-            html: 'Estamos comunicándonos con la entidad financiera.',
+            showConfirmButton: false,
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
             }
+        });
+
+        const startTime = Date.now();
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, 3000 - elapsedTime);
+
+            setTimeout(() => {
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<span style="color:#1d1d1f; font-weight:700;">¡Gracias por tu compra!</span>',
+                        html: `Tu pedido <b>#${document.getElementById('hiddenIdOrden').value}</b> ha sido confirmado.<br>Pronto lo recibirás en casa.`,
+                        confirmButtonText: 'Continuar comprando',
+                        confirmButtonColor: '#ff6a00',
+                        allowOutsideClick: false,
+                        customClass: { popup: 'rounded-4' }
+                    }).then(() => {
+                        window.location.href = '/Productos/Index';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No pudimos procesar el pago.',
+                        confirmButtonColor: '#ff6a00'
+                    });
+                }
+            }, remainingTime);
+        })
+        .catch(() => {
+            setTimeout(() => {
+                Swal.fire('Error', 'Problema de conexión.', 'error');
+            }, 3000);
         });
     });
 </script>

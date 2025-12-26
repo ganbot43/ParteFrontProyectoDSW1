@@ -15,11 +15,9 @@ namespace ParteFrontProyectoDSW1.Controllers
             _httpFactory = httpFactory;
         }
 
-        // 🟢 PANTALLA DE PAGO
         [HttpGet]
         public async Task<IActionResult> Registrar(int idOrden)
         {
-            // Si no se recibe idOrden, buscar la última orden pendiente del usuario
             if (idOrden <= 0)
             {
                 var user = HttpContext.Session.GetObject<UsuarioLoginDto>("CurrentUser");
@@ -57,8 +55,7 @@ namespace ParteFrontProyectoDSW1.Controllers
         [HttpPost]
         public async Task<IActionResult> Registrar(int idOrden, decimal monto, string metodo)
         {
-            if (idOrden <= 0)
-                return RedirectToAction("Index", "Productos");
+            if (idOrden <= 0) return BadRequest();
 
             var client = _httpFactory.CreateClient("ApiWeb");
             var resp = await client.PostAsync(
@@ -68,13 +65,10 @@ namespace ParteFrontProyectoDSW1.Controllers
 
             if (!resp.IsSuccessStatusCode)
             {
-                TempData["Error"] = "Error al registrar el pago";
-                return RedirectToAction(nameof(Registrar), new { idOrden });
+                return BadRequest();
             }
 
-            // Mensaje de éxito
-            TempData["Success"] = "Tu pago se ha registrado correctamente.";
-            return RedirectToAction("Index", "Productos"); // redirige al Index de Productos
+            return Ok();
         }
     }
 }
